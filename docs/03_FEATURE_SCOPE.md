@@ -19,7 +19,10 @@ The app's primary function is to serve as the **authoritative, local source of t
 
 ### 1.3 The "Insight Engine" (Visual Premium Feel)
 *   **Category Donut Chart**: "Where is my money going?" (e.g., 50% Entertainment).
-*   **Monthly Bar Goal**: Visualizing the "Monthly Burden" vs a user-set budget line.
+*   **Cashflow Forecast Chart (The "Pulse")**:
+    *   **X-Axis**: Days of the month (1-31).
+    *   **Representation**: Stacked Bar (Daily Cost by Category) + Line (Running Cumulative Total).
+    *   **Goal**: Shows "cash crunch" days instantly.
 *   *Constraint*: High-polish, static viz (using `fl_chart`). No complex drill-downs or interactive filtering in v1.0.
 
 ---

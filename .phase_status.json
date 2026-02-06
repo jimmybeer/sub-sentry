@@ -1,7 +1,7 @@
 {
     "project_name": "SubSentry",
     "current_phase": 1,
-    "current_step": "1.2",
+    "current_step": "1.3",
     "phase_gates": {
         "phase_1_to_2": {
             "status": "in_progress",
@@ -35,12 +35,14 @@
         }
     },
     "completed_steps": [
-        "1.1"
+        "1.1",
+        "1.2"
     ],
     "artefacts": {
-        "01_APP_CONCEPT.md": "created"
+        "01_APP_CONCEPT.md": "created",
+        "02_COMPETITIVE_ANALYSIS.md": "created"
     },
     "app_type": "self_contained",
     "monetisation": "paid_99p",
-    "last_updated": "2026-02-06T16:01:00Z"
+    "last_updated": "2026-02-06T16:15:00Z"
 }

@@ -17,6 +17,11 @@ The app's primary function is to serve as the **authoritative, local source of t
 *   **Trial Warnings**: Distinct "URGENT" style notification 24 hours before a free trial converts.
 *   **Contract Expiry**: Long-term warning for 12/18/24 month broadband/gym contracts.
 
+### 1.3 The "Insight Engine" (Visual Premium Feel)
+*   **Category Donut Chart**: "Where is my money going?" (e.g., 50% Entertainment).
+*   **Monthly Bar Goal**: Visualizing the "Monthly Burden" vs a user-set budget line.
+*   *Constraint*: High-polish, static viz (using `fl_chart`). No complex drill-downs or interactive filtering in v1.0.
+
 ---
 
 ## 2. Explicit "Won't Have" List (v1.0)
@@ -28,7 +33,7 @@ The app's primary function is to serve as the **authoritative, local source of t
 | **Bank Integration (Open Banking)** | Regulatory nightmare; high cost (Plaid/Yodlee fees); violates "99p" model. |
 | **Multi-Currency Conversion** | Requires live exchange rate API; adds UI complexity. (User selects ONE global currency). |
 | **Receipt Scanning / OCR** | High technical risk; high error rate; unnecessary for simple tracking. |
-| **Spending Analytics / Charts** | "Nice to have" fluff. v1.0 only needs "Total Monthly vs. Total Yearly" text. |
+| **Interactive Spending Reports** | Complex drill-downs excluded. Static charts ONLY. |
 | **Family Sharing** | Requires cloud sync (see above). |
 | **Subscription Cancellation Services** | Legal risk; we are a tracker, not a "Cancel for me" concierge. |
 

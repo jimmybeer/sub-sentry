@@ -6,10 +6,10 @@
 - [x] **1.3 Routing**: Setup `GoRouter` and Screen Placeholders.
 
 ## Phase 2: Domain & Data (The "Engine")
-- [ ] **2.1 Domain Entities**: Create `Subscription` class.
-- [ ] **2.2 Logic Engines**: Implement `BillingCalculator` (Pure Dart logic for "Next Bill Date").
-- [ ] **2.3 Unit Tests**: Verify `BillingCalculator` handles leap years and edge cases correctly.
-- [ ] **2.4 Hive Setup**: Create `SubscriptionModel` (HiveObject), TypeAdapters, and `SubscriptionRepository`.
+- [x] **2.1 Domain Entities**: Create `Subscription` class.
+- [x] **2.2 Logic Engines**: Implement `BillingCalculator` (Pure Dart logic for "Next Bill Date").
+- [x] **2.3 Unit Tests**: Verify `BillingCalculator` handles leap years and edge cases correctly.
+- [x] **2.4 Hive Setup**: Create `SubscriptionModel` (HiveObject), TypeAdapters, and `SubscriptionRepository`.
 
 ## Phase 3: Core Features (The "Vault")
 - [ ] **3.1 Global State**: Create `SubscriptionController` (Riverpod AsyncNotifier) for CRUD operations.

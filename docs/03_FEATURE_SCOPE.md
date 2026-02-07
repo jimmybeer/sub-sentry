@@ -34,8 +34,12 @@ The app's primary function is to serve as the **authoritative, local source of t
 | **Cost** | Decimal | Required. 2 decimal places. |
 | **Cycle** | Enum | Required. (Weekly, Monthly, Quarterly, Yearly). Affects "Next Bill" calc. |
 | **First Bill** | Date | Required. Anchors the cycle logic. |
+| **Next Bill (Override)** | Date | Optional. Allows user to manually set the *next* date if the auto-calc is wrong. |
 | **Category** | Enum | Required. (Entertainment, Utilities, Software, Gym, Other). Dictates default color. |
 | **Color** | Hex | User can override the category default. |
+| **Status** | Enum | Required. (Active, Paused, Canceled). Paused items are hidden from totals but kept in list. |
+| **Payment Source** | Text | Optional. "Amex", "Monzo", "Joint Account". |
+| **Cancellation URL** | Text | Optional. Deep link to "Manage Subscription" page. |
 | **Is Trial?** | Bool | Toggles "Trial Mode" logic. |
 | **Trial End** | Date | **Required if Is Trial is True**. Triggers "24h Warning". |
 | **Contract End**| Date | Optional. For broadband/gyms. Triggers "Re-negotiate" alert. |

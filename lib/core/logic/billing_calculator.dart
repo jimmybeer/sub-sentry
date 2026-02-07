@@ -41,13 +41,13 @@ class BillingCalculator {
           candidate = candidate.add(const Duration(days: 7));
           break;
         case BillingCycle.monthly:
-          candidate = _addMonths(candidate, 1);
+          candidate = addMonths(candidate, 1);
           break;
         case BillingCycle.quarterly:
-          candidate = _addMonths(candidate, 3);
+          candidate = addMonths(candidate, 3);
           break;
         case BillingCycle.yearly:
-          candidate = _addMonths(candidate, 12);
+          candidate = addMonths(candidate, 12);
           break;
       }
     }
@@ -55,7 +55,7 @@ class BillingCalculator {
     return candidate;
   }
 
-  static DateTime _addMonths(DateTime date, int monthsToAdd) {
+  static DateTime addMonths(DateTime date, int monthsToAdd) {
     var newYear = date.year;
     var newMonth = date.month + monthsToAdd;
 

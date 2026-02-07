@@ -18,7 +18,7 @@
 - [x] **3.4 List View**: Implement the "Vault" card list on Dashboard.
 
 ## Phase 4: Insights & Polish (The "Premium" Feel)
-- [ ] **4.1 Stats Logic**: Calculate "Total Monthly", "Projected Daily Spend".
+- [x] **4.1 Stats Logic**: Calculate "Total Monthly", "Projected Daily/weekly Spend".
 - [ ] **4.2 Pulse Chart**: Implement `fl_chart` Bar/Line combo.
 - [ ] **4.3 Settings**: Currency toggle, Theme toggle, Data Wipe.
 - [ ] **4.4 Onboarding**: Implement First-Run Wizard.

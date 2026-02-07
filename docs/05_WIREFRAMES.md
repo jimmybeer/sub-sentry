@@ -16,17 +16,17 @@
 *Goal: Get the user to add *one* subscription immediately so the dashboard isn't empty.*
 
 **Layout:**
-*   **Header**: "Welcome to SubSentry. Let's get safe." (Large, Bold)
+*   **Header**: "Welcome to SubSentry. Let's get organized." (Large, Bold)
 *   **Body**: 
     *   Simple Question: "What's one service you pay for?"
     *   **Input**: Smart Text Field (Auto-complete for "Netflix", "Spotify", etc.)
     *   **Action**: "Next" (Floating Action Button - FAB)
 *   **Step 2**: "How much?" (Number Pad pops up)
 *   **Step 3**: "When is it due?" (DatePicker)
-*   **Completion**: "You're protected. Let's see your dashboard." -> Transitions to Home.
+*   **Completion**: "You're in control. Let's see your dashboard." -> Transitions to Home.
 
 ### 2.2 Dashboard (Home)
-*Goal: Instant status check ("Am I safe?") and quick access to add more.*
+*Goal: Instant status check ("Where do I stand?") and quick access to add more.*
 
 **Layout (Top to Bottom):**
 1.  **The Insight Engine (Top 35%)**:
@@ -44,7 +44,7 @@
         *   *Left*: Category Icon (color background circle).
         *   *Middle*: Name (Bold) + Next Due Date (Subtext, e.g. "Tomorrow").
         *   *Right*: Cost (e.g. "£9.99").
-    *   **Empty State**: If list is empty, show illustration + "No subs yet. You're free! (Or are you forgetting something?)".
+    *   **Empty State**: If list is empty, show illustration + "Clean slate. You're free! (Or are you forgetting something?)".
 3.  **Floating Action Button (FAB)**:
     *   Position: Bottom-Right (Android) / Top-Right "Add" (iOS) - *Wait, enforcing bottom-right for both for thumb ease.*
     *   Icon: Large "+".

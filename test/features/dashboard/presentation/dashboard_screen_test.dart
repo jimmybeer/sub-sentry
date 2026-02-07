@@ -17,9 +17,7 @@ class MockSubscriptionRepository implements SubscriptionRepository {
 }
 
 void main() {
-  testWidgets('Dashboard shows subscriptions and summary total',
-      (tester) async {
-    // Large screen
+  testWidgets('Dashboard shows subscriptions and pulse chart', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
 
@@ -35,7 +33,6 @@ void main() {
       status: SubStatus.active,
       isTrial: false,
     );
-    // Yearly sub: 120 / year = 10 / month
     final sub2 = Subscription(
       id: '2',
       name: 'Yearly Sub',
@@ -51,7 +48,6 @@ void main() {
     await mockRepo.saveSubscription(sub1);
     await mockRepo.saveSubscription(sub2);
 
-    // We need GoRouter because onTap calls context.go
     final router = GoRouter(
       routes: [
         GoRoute(path: '/', builder: (_, __) => const DashboardScreen()),
@@ -79,15 +75,13 @@ void main() {
 
     // Verify Cards
     expect(find.byType(SubscriptionCard), findsNWidgets(2));
-    expect(find.text('Monthly Sub'), findsOneWidget);
-    expect(find.text('Yearly Sub'), findsOneWidget);
 
-    // Verify Total Monthly Cost
-    // 10 + (120/12) = 20
-    expect(find.text('Total Monthly Cost'), findsOneWidget);
-    // Format: £20.00
-    // Note: Depends on locale. simpleCurrency(locale: 'en_GB') -> £20.00
-    expect(find.textContaining('£20.00'), findsOneWidget);
+    // Verify Pulse Chart Title
+    expect(find.text('Spending Pulse'), findsOneWidget);
+
+    // Verify Run Rate (Normalized)
+    // 10 + 10 = 20.00
+    expect(find.textContaining('Run Rate: £20.00'), findsOneWidget);
 
     addTearDown(() => tester.view.resetPhysicalSize());
   });

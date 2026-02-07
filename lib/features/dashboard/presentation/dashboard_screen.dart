@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import '../../subscriptions/domain/subscription.dart';
+import '../../analysis/logic/subscription_stats_logic.dart';
+import '../../analysis/presentation/widgets/pulse_chart.dart';
 import '../../subscriptions/presentation/providers/subscription_controller.dart';
 import '../../subscriptions/presentation/widgets/subscription_card.dart';
 
@@ -42,61 +42,46 @@ class DashboardScreen extends ConsumerWidget {
             ));
           }
 
-          final totalMonthly =
-              subs.fold(0.0, (sum, s) => sum + _normalizeCost(s));
+          // Compute Stats
+          final stats = SubscriptionStatsLogic.calculate(subs);
 
           return Column(
             children: [
-              // Summary Card
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withOpacity(0.8),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
+              // Pulse Chart (Includes Total Cashflow)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: PulseChart(stats: stats),
+              ),
+
+              // List Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
                   children: [
-                    const Text(
-                      'Total Monthly Cost',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
                     Text(
-                      NumberFormat.simpleCurrency(locale: 'en_GB')
-                          .format(totalMonthly),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      'All Subscriptions',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                    ),
+                    const Spacer(),
+                    // Maybe show Normalized "Run Rate" here?
+                    Text(
+                      'Run Rate: £${stats.totalNormalizedMonthlyCost.toStringAsFixed(2)}/mo',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey,
+                          ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 8),
 
               // List
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 80), // Fab space
+                  padding: const EdgeInsets.only(bottom: 80),
                   itemCount: subs.length,
                   itemBuilder: (context, index) {
                     final sub = subs[index];
@@ -120,18 +105,5 @@ class DashboardScreen extends ConsumerWidget {
         label: const Text('Add New'),
       ),
     );
-  }
-
-  double _normalizeCost(Subscription s) {
-    switch (s.cycle) {
-      case BillingCycle.weekly:
-        return s.cost * 4.33; // Approx weeks in month
-      case BillingCycle.monthly:
-        return s.cost;
-      case BillingCycle.quarterly:
-        return s.cost / 3;
-      case BillingCycle.yearly:
-        return s.cost / 12;
-    }
   }
 }

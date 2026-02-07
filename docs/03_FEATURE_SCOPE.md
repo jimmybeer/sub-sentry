@@ -25,6 +25,22 @@ The app's primary function is to serve as the **authoritative, local source of t
     *   **Goal**: Shows "cash crunch" days instantly.
 *   *Constraint*: High-polish, static viz (using `fl_chart`). No complex drill-downs or interactive filtering in v1.0.
 
+### 1.4 Data Schema (The "Subscription" Object)
+*Defines the exact fields users must/can enter to support the feature set.*
+
+| Field | Type | Logic / Notes |
+| :--- | :--- | :--- |
+| **Name** | Text | Required. "Netflix", "Gym", etc. |
+| **Cost** | Decimal | Required. 2 decimal places. |
+| **Cycle** | Enum | Required. (Weekly, Monthly, Quarterly, Yearly). Affects "Next Bill" calc. |
+| **First Bill** | Date | Required. Anchors the cycle logic. |
+| **Category** | Enum | Required. (Entertainment, Utilities, Software, Gym, Other). Dictates default color. |
+| **Color** | Hex | User can override the category default. |
+| **Is Trial?** | Bool | Toggles "Trial Mode" logic. |
+| **Trial End** | Date | **Required if Is Trial is True**. Triggers "24h Warning". |
+| **Contract End**| Date | Optional. For broadband/gyms. Triggers "Re-negotiate" alert. |
+| **Notes** | Text | Optional. "Cancel after Season 4 finishes". |
+
 ---
 
 ## 2. Explicit "Won't Have" List (v1.0)

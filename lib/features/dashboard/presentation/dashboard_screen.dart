@@ -25,6 +25,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       appBar: AppBar(
         title: const Text('My Vault'),
         centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.go('/home/settings'),
+          ),
+        ],
       ),
       body: asyncSubs.when(
         data: (subs) {

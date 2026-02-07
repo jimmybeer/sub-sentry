@@ -6,7 +6,7 @@ import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/subscriptions/presentation/add_subscription_screen.dart';
 import '../../features/subscriptions/presentation/edit_subscription_screen.dart';
-import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
 
 part 'app_router.g.dart';
 

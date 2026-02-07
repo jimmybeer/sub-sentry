@@ -19,7 +19,7 @@
 
 ## Phase 4: Insights & Polish (The "Premium" Feel)
 - [x] **4.1 Stats Logic**: Calculate "Total Monthly", "Projected Daily/weekly Spend".
-- [x] **4.2 Pulse Chart**: Implement `fl_chart` Bar/Line combo.
+- [x] **4.2 Pulse & Breakdown Charts**: Implement `fl_chart` Bar/Line and Pie combo.
 - [ ] **4.3 Settings**: Currency toggle, Theme toggle, Data Wipe.
 - [ ] **4.4 Onboarding**: Implement First-Run Wizard.
 

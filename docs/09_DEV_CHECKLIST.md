@@ -12,7 +12,7 @@
 - [x] **2.4 Hive Setup**: Create `SubscriptionModel` (HiveObject), TypeAdapters, and `SubscriptionRepository`.
 
 ## Phase 3: Core Features (The "Vault")
-- [ ] **3.1 Global State**: Create `SubscriptionController` (Riverpod AsyncNotifier) for CRUD operations.
+- [x] **3.1 Global State**: Create `SubscriptionController` (Riverpod AsyncNotifier) for CRUD operations.
 - [ ] **3.2 Add Subscription UI**: Build the form with inputs: Name, Cost, Cycle, Date.
 - [ ] **3.3 Edit Subscription UI**: Pre-fill form, add Delete button.
 - [ ] **3.4 List View**: Implement the "Vault" card list on Dashboard.

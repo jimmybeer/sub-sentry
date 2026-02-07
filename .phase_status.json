@@ -41,7 +41,8 @@
         "1.4",
         "2.1",
         "2.2",
-        "2.3"
+        "2.3",
+        "3.1"
     ],
     "artefacts": {
         "01_APP_CONCEPT.md": "created",
@@ -50,9 +51,10 @@
         "04_GO_NO_GO.md": "created",
         "05_WIREFRAMES.md": "created",
         "06_VISUAL_DESIGN.md": "created",
-        "07_ARCHITECTURE.md": "created"
+        "07_ARCHITECTURE.md": "created",
+        "08_NAVIGATION_MAP.md": "created"
     },
     "app_type": "self_contained",
     "monetisation": "paid_99p",
-    "last_updated": "2026-02-07T18:00:00Z"
+    "last_updated": "2026-02-07T18:38:00Z"
 }

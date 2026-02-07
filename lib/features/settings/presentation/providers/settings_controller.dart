@@ -6,19 +6,23 @@ import 'package:hive_flutter/hive_flutter.dart';
 class SettingsState {
   final ThemeMode themeMode;
   final String currencyCode;
+  final bool hasSeenOnboarding;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
     this.currencyCode = 'GBP',
+    this.hasSeenOnboarding = false,
   });
 
   SettingsState copyWith({
     ThemeMode? themeMode,
     String? currencyCode,
+    bool? hasSeenOnboarding,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
       currencyCode: currencyCode ?? this.currencyCode,
+      hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
     );
   }
 }
@@ -36,14 +40,18 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     if (modeStr == 'dark') mode = ThemeMode.dark;
 
     final currency = _box.get('currency', defaultValue: 'GBP');
+    final seenOnboarding = _box.get('onboarding_complete', defaultValue: false);
 
-    return SettingsState(themeMode: mode, currencyCode: currency);
+    return SettingsState(
+      themeMode: mode,
+      currencyCode: currency,
+      hasSeenOnboarding: seenOnboarding,
+    );
   }
 
   Future<void> toggleTheme(bool isDark) async {
     final newMode = isDark ? ThemeMode.dark : ThemeMode.light;
     await _box.put('theme_mode', isDark ? 'dark' : 'light');
-    // Optimistic update
     state = AsyncData(state.value!.copyWith(themeMode: newMode));
   }
 
@@ -52,10 +60,14 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     state = AsyncData(state.value!.copyWith(currencyCode: code));
   }
 
+  Future<void> completeOnboarding() async {
+    await _box.put('onboarding_complete', true);
+    state = AsyncData(state.value!.copyWith(hasSeenOnboarding: true));
+  }
+
   Future<void> wipeData() async {
     await _box.clear();
 
-    // Clear subscriptions
     if (Hive.isBoxOpen('subscriptions')) {
       await Hive.box('subscriptions').clear();
     } else {
@@ -63,7 +75,6 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       await subBox.clear();
     }
 
-    // Reset local state to default
     state = const AsyncData(SettingsState());
   }
 }

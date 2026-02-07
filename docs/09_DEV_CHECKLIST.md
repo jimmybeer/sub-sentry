@@ -21,7 +21,7 @@
 - [x] **4.1 Stats Logic**: Calculate "Total Monthly", "Projected Daily/weekly Spend".
 - [x] **4.2 Pulse & Breakdown Charts**: Implement `fl_chart` Bar/Line and Pie combo.
 - [x] **4.3 Settings**: Currency toggle, Theme toggle, Data Wipe.
-- [ ] **4.4 Onboarding**: Implement First-Run Wizard.
+- [x] **4.4 Onboarding**: Implement First-Run Wizard.
 
 ## Phase 5: Production Readiness
 - [ ] **5.1 App Icon**: Generate launcher icons.

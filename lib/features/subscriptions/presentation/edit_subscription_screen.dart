@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
 import 'package:sub_sentry/features/subscriptions/presentation/providers/subscription_controller.dart';
 import 'widgets/subscription_form.dart';
@@ -46,19 +47,19 @@ class EditSubscriptionScreen extends ConsumerWidget {
                       'Are you sure you want to delete this subscription?'),
                   actions: [
                     TextButton(
-                      onPressed: () => context.pop(),
+                      onPressed: () => Navigator.of(context).pop(),
                       child: const Text('Cancel'),
                     ),
                     TextButton(
                       style: TextButton.styleFrom(
                           foregroundColor: Theme.of(context).colorScheme.error),
                       onPressed: () {
+                        // Close dialog
+                        Navigator.of(context).pop();
+                        // Trigger delete and close screen
                         ref
                             .read(subscriptionControllerProvider.notifier)
                             .deleteSubscription(id);
-                        // Pop dialog
-                        context.pop();
-                        // Pop screen
                         context.pop();
                       },
                       child: const Text('Delete'),

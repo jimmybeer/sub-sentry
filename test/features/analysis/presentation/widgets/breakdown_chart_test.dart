@@ -19,6 +19,11 @@ void main() {
         SubCategory.entertainment: 60.0,
         SubCategory.utilities: 40.0,
       },
+      actualCategoryBreakdown: {
+        SubCategory.entertainment: 55.0,
+        SubCategory.utilities: 35.0,
+      },
+      month: DateTime(2024, 2, 1),
     );
 
     await tester.pumpWidget(
@@ -32,8 +37,9 @@ void main() {
     // Wireframe: "Total: £145".
     // Usually Breakdown sums to the Total shown.
     // If breakdown uses Normalized category costs, it should show Normalized Total.
-    expect(find.textContaining('Total'), findsOneWidget);
-    expect(find.textContaining('£100.00'), findsOneWidget);
+    // By default showing "Current" (Actual Month)
+    expect(find.textContaining('Current'), findsOneWidget);
+    expect(find.textContaining('£90.00'), findsOneWidget);
 
     // Verify Categories appear (Legend or Badge)
     // We expect "Entertainment" and "Utilities" to be visible

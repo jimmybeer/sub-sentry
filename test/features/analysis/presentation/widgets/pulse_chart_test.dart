@@ -17,6 +17,8 @@ void main() {
       totalNormalizedMonthlyCost: 150,
       projectedCashflowTotal: 150,
       categoryBreakdown: {},
+      actualCategoryBreakdown: {},
+      month: DateTime(2024, 2, 1),
     );
 
     await tester.pumpWidget(

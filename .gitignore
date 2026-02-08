@@ -11,3 +11,5 @@ key.properties
 # Build
 build/
 .dart_tool/
+
+*.log

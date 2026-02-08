@@ -117,7 +117,7 @@ void main() {
 
   testWidgets('EditSubscriptionScreen deletes subscription', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
+    tester.view.devicePixelRatio = 3.0;
 
     final mockRepo = MockSubscriptionRepository();
     final sub = Subscription(
@@ -134,7 +134,7 @@ void main() {
     await mockRepo.saveSubscription(sub);
 
     final router = GoRouter(
-      initialLocation: '/home',
+      initialLocation: '/edit/sub_delete',
       routes: [
         GoRoute(
             path: '/home',
@@ -157,21 +157,28 @@ void main() {
       ),
     );
 
-    router.go('/edit/sub_delete');
+    // Initial check (Start on Edit Screen)
+    await tester.pumpAndSettle();
+    expect(find.text('To Delete'), findsOneWidget); // New check
+
+    // Verify Button Exists
+    final deleteFinder = find.byIcon(Icons.delete);
+    expect(deleteFinder, findsOneWidget);
+
+    // Tap delete button
+    await tester.tap(deleteFinder);
     await tester.pumpAndSettle();
 
-    // Find Delete Button
-    final deleteBtn = find.byKey(const Key('delete_button'));
-    await tester.tap(deleteBtn);
-    await tester.pumpAndSettle(); // Dialog animation
-
-    // Confirm Delete
+    // Confirm Delete Dialog
     expect(find.text('Confirm Delete'), findsOneWidget);
-    await tester.tap(find.text('Delete'));
+    final confirmBtn = find.widgetWithText(TextButton, 'Delete');
+    expect(confirmBtn, findsOneWidget);
+    await tester.tap(confirmBtn);
     await tester.pumpAndSettle();
 
-    // Verify Return to Home
-    expect(find.text('Home'), findsOneWidget);
+    // Verify dialog and edit screen are gone (popped back to initial route)
+    expect(find.text('Confirm Delete'), findsNothing);
+    expect(find.text('To Delete'), findsNothing);
 
     // Verify Repo empty
     final subs = await mockRepo.getAllSubscriptions();

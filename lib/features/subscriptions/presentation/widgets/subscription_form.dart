@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
+import 'package:sub_sentry/core/constants/category_colors.dart';
 import 'package:uuid/uuid.dart';
 
 class SubscriptionForm extends StatefulWidget {
@@ -30,8 +31,14 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
   late BillingCycle _cycle;
   late DateTime _firstBillDate;
   late SubCategory _category;
-  Color _color = Colors.blue;
+  Color _color = Colors.blue; // Will be overridden in initState
   late SubStatus _status;
+  bool _isTrial = false;
+  DateTime? _trialEndDate;
+  DateTime? _contractEndDate;
+  DateTime? _nextBillOverride;
+  late TextEditingController _paymentSourceController;
+  late TextEditingController _notesController;
 
   @override
   void initState() {
@@ -46,13 +53,39 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
     _category =
         data?.category ?? widget.initialCategory ?? SubCategory.entertainment;
 
+    // Set color from existing data or use category default
+    if (data?.colorHex != null) {
+      _color = _parseColorHex(data!.colorHex);
+    } else {
+      _color = CategoryColors.getColor(_category);
+    }
+
     _status = data?.status ?? SubStatus.active;
+    _isTrial = data?.isTrial ?? false;
+    _trialEndDate = data?.trialEndDate;
+    _contractEndDate = data?.contractEndDate;
+    _nextBillOverride = data?.nextBillOverride;
+    _paymentSourceController =
+        TextEditingController(text: data?.paymentSource ?? '');
+    _notesController = TextEditingController(text: data?.notes ?? '');
+  }
+
+  Color _parseColorHex(String hex) {
+    try {
+      if (hex.startsWith('#')) hex = hex.substring(1);
+      if (hex.length == 6) hex = 'FF$hex';
+      return Color(int.parse(hex, radix: 16));
+    } catch (_) {
+      return CategoryColors.getColor(_category);
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _costController.dispose();
+    _paymentSourceController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -71,29 +104,105 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
         category: _category,
         colorHex: '#${_color.value.toRadixString(16)}',
         status: _status,
-        isTrial: widget.initialData?.isTrial ?? false,
-        paymentSource: widget.initialData?.paymentSource,
+        isTrial: _isTrial,
+        paymentSource: _paymentSourceController.text.trim().isEmpty
+            ? null
+            : _paymentSourceController.text.trim(),
         cancellationUrl: widget.initialData?.cancellationUrl,
-        trialEndDate: widget.initialData?.trialEndDate,
-        contractEndDate: widget.initialData?.contractEndDate,
-        notes: widget.initialData?.notes,
-        nextBillOverride: widget.initialData?.nextBillOverride,
+        trialEndDate: _trialEndDate,
+        contractEndDate: _contractEndDate,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+        nextBillOverride: _nextBillOverride,
       );
 
       widget.onSave(sub);
     }
   }
 
-  Future<void> _pickDate() async {
+  Future<void> _selectDate(
+      DateTime? initial, ValueChanged<DateTime> onSelected) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _firstBillDate,
+      initialDate: initial ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
+    if (picked != null) onSelected(picked);
+  }
+
+  Future<void> _pickBillDate() async {
+    final initialDate = _nextBillOverride ?? _firstBillDate;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
     if (picked != null) {
-      setState(() => _firstBillDate = picked);
+      if (!mounted) return;
+
+      if (widget.initialData == null) {
+        setState(() => _firstBillDate = picked);
+      } else {
+        final choice = await showDialog<String>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Change Payment Date'),
+            content: const Text(
+                'Is this a one-off change for the next bill, or a permanent change to the billing cycle?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, 'one-off'),
+                child: const Text('One-off'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, 'permanent'),
+                child: const Text('Permanent'),
+              ),
+            ],
+          ),
+        );
+
+        if (choice == 'permanent') {
+          setState(() {
+            _firstBillDate = picked;
+            _nextBillOverride = null;
+          });
+        } else if (choice == 'one-off') {
+          setState(() {
+            _nextBillOverride = picked;
+          });
+        }
+      }
     }
+  }
+
+  String _getPaymentDateDescription() {
+    final date = _nextBillOverride ?? _firstBillDate;
+    final isOneOff = _nextBillOverride != null;
+    final isEdit = widget.initialData != null;
+
+    if (isOneOff) {
+      return '${DateFormat.yMMMd().format(date)} (One-off)';
+    }
+
+    if (isEdit) {
+      switch (_cycle) {
+        case BillingCycle.monthly:
+          return 'Day ${date.day} of every month';
+        case BillingCycle.weekly:
+          return 'Every ${DateFormat('EEEE').format(date)}';
+        case BillingCycle.yearly:
+          return 'Every ${DateFormat('MMMM d').format(date)}';
+        case BillingCycle.quarterly:
+          return 'Day ${date.day} (Quarterly)';
+      }
+    }
+
+    return DateFormat.yMMMd().format(date);
   }
 
   @override
@@ -168,10 +277,91 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                 const SizedBox(height: 16),
 
                 ListTile(
-                  title: const Text('First Bill Date'),
-                  subtitle: Text(DateFormat.yMMMd().format(_firstBillDate)),
+                  title: const Text('Payment Date'),
+                  subtitle: Text(_getPaymentDateDescription()),
                   trailing: const Icon(Icons.calendar_today),
-                  onTap: _pickDate,
+                  onTap: _pickBillDate,
+                ),
+                const Divider(),
+
+                // Is Trial / Trial End Date
+                SwitchListTile(
+                  title: const Text('Is Trial?'),
+                  value: _isTrial,
+                  onChanged: (v) => setState(() => _isTrial = v),
+                ),
+                if (_isTrial)
+                  ListTile(
+                    title: const Text('Trial End Date'),
+                    subtitle: Text(_trialEndDate == null
+                        ? 'Select Date'
+                        : DateFormat.yMMMd().format(_trialEndDate!)),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () => _selectDate(_trialEndDate, (d) {
+                      setState(() {
+                        _trialEndDate = d;
+                        _firstBillDate = d;
+                      });
+                    }),
+                  ),
+
+                // Contract End Date
+                ListTile(
+                  title: const Text('Contract End Date'),
+                  subtitle: Text(_contractEndDate == null
+                      ? 'None'
+                      : DateFormat.yMMMd().format(_contractEndDate!)),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_contractEndDate != null)
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () =>
+                              setState(() => _contractEndDate = null),
+                        ),
+                      const Icon(Icons.calendar_today),
+                    ],
+                  ),
+                  onTap: () => _selectDate(_contractEndDate,
+                      (d) => setState(() => _contractEndDate = d)),
+                ),
+                const SizedBox(height: 16),
+
+                // Payment Source
+                TextFormField(
+                  key: const Key('payment_source_input'),
+                  controller: _paymentSourceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Payment Source',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Status
+                DropdownButtonFormField<SubStatus>(
+                  key: const Key('status_input'),
+                  value: _status,
+                  decoration: const InputDecoration(
+                      labelText: 'Status', border: OutlineInputBorder()),
+                  items: SubStatus.values.map((s) {
+                    return DropdownMenuItem(
+                        value: s, child: Text(s.name.toUpperCase()));
+                  }).toList(),
+                  onChanged: (v) => setState(() => _status = v!),
+                ),
+                const SizedBox(height: 16),
+
+                // Notes
+                TextFormField(
+                  key: const Key('notes_input'),
+                  controller: _notesController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Notes',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               ],
             ),

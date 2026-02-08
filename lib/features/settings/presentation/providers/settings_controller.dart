@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../../../subscriptions/data/model/subscription_model.dart';
 
 @immutable
 class SettingsState {
@@ -68,10 +69,9 @@ class SettingsController extends AsyncNotifier<SettingsState> {
   Future<void> wipeData() async {
     await _box.clear();
 
+    // Use typed box to match how it was opened in main.dart
     if (Hive.isBoxOpen('subscriptions')) {
-      await Hive.box('subscriptions').clear();
-    } else {
-      final subBox = await Hive.openBox('subscriptions');
+      final subBox = Hive.box<SubscriptionModel>('subscriptions');
       await subBox.clear();
     }
 

@@ -106,4 +106,20 @@ void main() {
     expect(stats.categoryBreakdown[SubCategory.entertainment], 30.0);
     expect(stats.categoryBreakdown[SubCategory.utilities], 100.0);
   });
+
+  test('Calculates actual category breakdown based on month cashflow', () {
+    final now = DateTime(2024, 2, 1);
+    // Weekly sub (Feb 2024 has 4 weeks/payments for this sub: 2, 9, 16, 23)
+    final subWeekly = _sub(
+        cost: 10,
+        cycle: BillingCycle.weekly,
+        category: SubCategory.entertainment,
+        firstBillDate: DateTime(2024, 1, 26));
+
+    final stats = SubscriptionStatsLogic.calculate([subWeekly], month: now);
+
+    // Normalized would be 43.33
+    // Actual for Feb 2024 is 4 payments * 10 = 40.0
+    expect(stats.actualCategoryBreakdown[SubCategory.entertainment], 40.0);
+  });
 }

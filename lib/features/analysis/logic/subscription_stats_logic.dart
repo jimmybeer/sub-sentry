@@ -6,19 +6,25 @@ class SubscriptionStats {
   final double projectedCashflowTotal;
   final Map<int, double> dailyCashflow;
   final Map<SubCategory, double> categoryBreakdown;
+  final Map<SubCategory, double> actualCategoryBreakdown;
+  final DateTime month;
 
   const SubscriptionStats({
     required this.totalNormalizedMonthlyCost,
     required this.projectedCashflowTotal,
     required this.dailyCashflow,
     required this.categoryBreakdown,
+    required this.actualCategoryBreakdown,
+    required this.month,
   });
 
-  factory SubscriptionStats.empty() => const SubscriptionStats(
+  factory SubscriptionStats.empty() => SubscriptionStats(
         totalNormalizedMonthlyCost: 0,
         projectedCashflowTotal: 0,
         dailyCashflow: {},
         categoryBreakdown: {},
+        actualCategoryBreakdown: {},
+        month: DateTime.now(),
       );
 }
 
@@ -36,6 +42,7 @@ class SubscriptionStatsLogic {
     double cashflowTotal = 0;
     final dailyCashflow = <int, double>{};
     final categoryBreakdown = <SubCategory, double>{};
+    final actualCategoryBreakdown = <SubCategory, double>{};
 
     for (final sub in subs) {
       if (sub.status != SubStatus.active) continue;
@@ -87,22 +94,38 @@ class SubscriptionStatsLogic {
           dailyCashflow.update(day, (val) => val + sub.cost,
               ifAbsent: () => sub.cost);
           cashflowTotal += sub.cost;
+          actualCategoryBreakdown.update(sub.category, (val) => val + sub.cost,
+              ifAbsent: () => sub.cost);
         }
 
         // Step forward
-        switch (sub.cycle) {
-          case BillingCycle.weekly:
-            candidate = candidate.add(const Duration(days: 7));
-            break;
-          case BillingCycle.monthly:
-            candidate = BillingCalculator.addMonths(candidate, 1);
-            break;
-          case BillingCycle.quarterly:
-            candidate = BillingCalculator.addMonths(candidate, 3);
-            break;
-          case BillingCycle.yearly:
-            candidate = BillingCalculator.addMonths(candidate, 12);
-            break;
+        // Step forward
+        if (sub.nextBillOverride != null &&
+            BillingCalculator.isSameDay(candidate, sub.nextBillOverride!)) {
+          // If this was a one-off override, revert to original schedule for next bill
+          // We calculate the next proper bill date from the *original* firstBillDate,
+          // ensuring it is after the current override date.
+          final nextOriginal = BillingCalculator.calculateNextBillDate(
+            sub.firstBillDate,
+            sub.cycle,
+            referenceDate: candidate.add(const Duration(days: 1)),
+          );
+          candidate = nextOriginal;
+        } else {
+          switch (sub.cycle) {
+            case BillingCycle.weekly:
+              candidate = candidate.add(const Duration(days: 7));
+              break;
+            case BillingCycle.monthly:
+              candidate = BillingCalculator.addMonths(candidate, 1);
+              break;
+            case BillingCycle.quarterly:
+              candidate = BillingCalculator.addMonths(candidate, 3);
+              break;
+            case BillingCycle.yearly:
+              candidate = BillingCalculator.addMonths(candidate, 12);
+              break;
+          }
         }
       }
     }
@@ -112,6 +135,8 @@ class SubscriptionStatsLogic {
       projectedCashflowTotal: cashflowTotal,
       dailyCashflow: dailyCashflow,
       categoryBreakdown: categoryBreakdown,
+      actualCategoryBreakdown: actualCategoryBreakdown,
+      month: targetMonth,
     );
   }
 }

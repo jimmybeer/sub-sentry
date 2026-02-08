@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../logic/subscription_stats_logic.dart';
 import '../../../subscriptions/domain/subscription.dart'; // For SubCategory
+import '../../../../core/constants/category_colors.dart';
+
+enum BreakdownView { actualMonth, monthlyAverage }
 
 class BreakdownChart extends StatefulWidget {
   final SubscriptionStats stats;
@@ -15,16 +18,22 @@ class BreakdownChart extends StatefulWidget {
 
 class _BreakdownChartState extends State<BreakdownChart> {
   int touchedIndex = -1;
+  BreakdownView currentView = BreakdownView.actualMonth; // Default to actual
 
   @override
   Widget build(BuildContext context) {
-    final breakdown = widget.stats.categoryBreakdown;
-    final total = widget.stats.totalNormalizedMonthlyCost;
+    final isActual = currentView == BreakdownView.actualMonth;
+    final breakdown = isActual
+        ? widget.stats.actualCategoryBreakdown
+        : widget.stats.categoryBreakdown;
+    final total = isActual
+        ? widget.stats.projectedCashflowTotal
+        : widget.stats.totalNormalizedMonthlyCost;
 
     if (breakdown.isEmpty) {
       return const SizedBox(
         height: 200,
-        child: Center(child: Text("No data")),
+        child: Center(child: Text("No data for this view")),
       );
     }
 
@@ -39,12 +48,39 @@ class _BreakdownChartState extends State<BreakdownChart> {
       child: Column(
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Category Breakdown',
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium
                       ?.copyWith(fontWeight: FontWeight.bold)),
+              // View Toggle
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceVariant
+                      .withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    _ToggleButton(
+                      label: 'Actual',
+                      isSelected: isActual,
+                      onTap: () => setState(
+                          () => currentView = BreakdownView.actualMonth),
+                    ),
+                    _ToggleButton(
+                      label: 'Average',
+                      isSelected: !isActual,
+                      onTap: () => setState(
+                          () => currentView = BreakdownView.monthlyAverage),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -71,20 +107,22 @@ class _BreakdownChartState extends State<BreakdownChart> {
                     borderData: FlBorderData(show: false),
                     sectionsSpace: 2,
                     centerSpaceRadius: 40,
-                    sections: _generateSections(breakdown),
+                    sections: _generateSections(breakdown, total),
                   ),
                 ),
                 Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('Total',
-                          style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text(isActual ? 'Current' : 'Average',
+                          style: const TextStyle(
+                              fontSize: 10, color: Colors.grey)),
                       Text(
                         currencyFormat.format(total),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
                       ),
                     ],
@@ -101,8 +139,8 @@ class _BreakdownChartState extends State<BreakdownChart> {
             alignment: WrapAlignment.center,
             children: breakdown.entries.map((entry) {
               final cat = entry.key;
-              final isTouched =
-                  breakdown.keys.toList().indexOf(cat) == touchedIndex;
+              final index = breakdown.keys.toList().indexOf(cat);
+              final isTouched = index == touchedIndex;
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -118,6 +156,7 @@ class _BreakdownChartState extends State<BreakdownChart> {
                   Text(
                     cat.name[0].toUpperCase() + cat.name.substring(1),
                     style: TextStyle(
+                      fontSize: 12,
                       fontWeight:
                           isTouched ? FontWeight.bold : FontWeight.normal,
                       color: isTouched ? Theme.of(context).primaryColor : null,
@@ -133,11 +172,13 @@ class _BreakdownChartState extends State<BreakdownChart> {
   }
 
   List<PieChartSectionData> _generateSections(
-      Map<SubCategory, double> breakdown) {
+      Map<SubCategory, double> breakdown, double total) {
+    if (total == 0) return [];
+
     final keys = breakdown.keys.toList();
     return List.generate(keys.length, (i) {
       final isTouched = i == touchedIndex;
-      final fontSize = isTouched ? 18.0 : 14.0;
+      final fontSize = isTouched ? 16.0 : 12.0;
       final radius = isTouched ? 60.0 : 50.0;
       final cat = keys[i];
       final value = breakdown[cat]!;
@@ -145,8 +186,7 @@ class _BreakdownChartState extends State<BreakdownChart> {
       return PieChartSectionData(
         color: _getColorForCategory(cat),
         value: value,
-        title:
-            '${(value / widget.stats.totalNormalizedMonthlyCost * 100).toStringAsFixed(0)}%',
+        title: '${(value / total * 100).toStringAsFixed(0)}%',
         radius: radius,
         titleStyle: TextStyle(
           fontSize: fontSize,
@@ -158,20 +198,42 @@ class _BreakdownChartState extends State<BreakdownChart> {
   }
 
   Color _getColorForCategory(SubCategory cat) {
-    // Simple mapping or hash
-    switch (cat) {
-      case SubCategory.entertainment:
-        return Colors.purple;
-      case SubCategory.utilities:
-        return Colors.orange;
-      case SubCategory.software:
-        return Colors.blue;
-      case SubCategory.gym:
-        return Colors.green;
-      case SubCategory.finance:
-        return Colors.red;
-      case SubCategory.other:
-        return Colors.grey;
-    }
+    return CategoryColors.getColor(cat);
+  }
+}
+
+class _ToggleButton extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ToggleButton({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color:
+              isSelected ? Theme.of(context).primaryColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.white : Colors.grey[600],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -35,24 +35,20 @@ class SubscriptionController extends _$SubscriptionController {
   }
 
   Future<void> addSubscription(Subscription sub) async {
-    state = const AsyncValue.loading();
     try {
       final repo = ref.read(subscriptionRepositoryProvider);
       await repo.saveSubscription(sub);
       ref.invalidateSelf();
-      await future;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
   }
 
   Future<void> deleteSubscription(String id) async {
-    state = const AsyncValue.loading();
     try {
       final repo = ref.read(subscriptionRepositoryProvider);
       await repo.deleteSubscription(id);
       ref.invalidateSelf();
-      await future;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -60,6 +56,6 @@ class SubscriptionController extends _$SubscriptionController {
 
   Future<void> updateSubscription(Subscription sub) async {
     // Same as add (Repo handles upsert logic via ID)
-    return addSubscription(sub);
+    await addSubscription(sub);
   }
 }

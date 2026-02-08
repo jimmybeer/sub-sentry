@@ -43,10 +43,11 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: background,
       textTheme: _textTheme(textPrimary, textSecondary),
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: surface,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16))),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: primary,
@@ -69,27 +70,28 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: const ColorScheme(
         brightness: Brightness.dark,
-        primary: primary, // Keep brand color? Or lighter variant?
+        primary: Color(0xFF4BA3B5), // More vibrant teal for dark mode
         onPrimary: Colors.white,
-        primaryContainer: Color(0xFF004D40), // Darker teal
-        onPrimaryContainer: Color(0xFFB2DFDB),
+        primaryContainer: Color(0xFF0F4C5C), // Use brand teal as container
+        onPrimaryContainer: Color(0xFFD8E9EC),
         secondary: secondary,
         onSecondary: Colors.white,
         secondaryContainer: Color(0xFF5D4037),
         onSecondaryContainer: Color(0xFFD7CCC8),
         error: Color(0xFFCF6679),
         onError: Colors.black,
-        background: darkBackground,
+        background: Color(0xFF121212),
         onBackground: darkTextPrimary,
-        surface: darkSurface,
+        surface: Color(0xFF1E1E1E),
         onSurface: darkTextPrimary,
       ),
       scaffoldBackgroundColor: darkBackground,
       textTheme: _textTheme(darkTextPrimary, darkTextSecondary),
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: darkSurface,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16))),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: primary,

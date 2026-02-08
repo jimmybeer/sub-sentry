@@ -40,6 +40,10 @@ GoRouter goRouter(GoRouterRef ref) {
     },
     routes: [
       GoRoute(
+        path: '/',
+        redirect: (context, state) => '/home',
+      ),
+      GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
       ),

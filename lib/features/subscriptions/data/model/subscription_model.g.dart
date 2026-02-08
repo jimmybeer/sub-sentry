@@ -32,13 +32,14 @@ class SubscriptionModelAdapter extends TypeAdapter<SubscriptionModel> {
       trialEndDate: fields[12] as DateTime?,
       contractEndDate: fields[13] as DateTime?,
       notes: fields[14] as String?,
+      ignoreWeekendShift: fields[15] == null ? false : fields[15] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, SubscriptionModel obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -68,7 +69,9 @@ class SubscriptionModelAdapter extends TypeAdapter<SubscriptionModel> {
       ..writeByte(13)
       ..write(obj.contractEndDate)
       ..writeByte(14)
-      ..write(obj.notes);
+      ..write(obj.notes)
+      ..writeByte(15)
+      ..write(obj.ignoreWeekendShift);
   }
 
   @override

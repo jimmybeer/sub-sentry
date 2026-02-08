@@ -89,6 +89,8 @@ class SubscriptionCard extends StatelessWidget {
                             color: Colors.grey[600],
                           ),
                     ),
+                    const SizedBox(height: 4),
+                    _buildStatusIcons(context, nextDate),
                   ],
                 ),
               ),
@@ -105,5 +107,93 @@ class SubscriptionCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildStatusIcons(BuildContext context, DateTime nextDate) {
+    final now = DateTime.now();
+    final List<Widget> icons = [];
+
+    // Paused / Canceled
+    if (subscription.status == SubStatus.paused) {
+      icons.add(const Tooltip(
+        showDuration: Duration(seconds: 4),
+        triggerMode: TooltipTriggerMode.tap,
+        message: 'Paused',
+        child: Padding(
+          padding: EdgeInsets.only(right: 8),
+          child: Icon(Icons.pause, color: Colors.orange, size: 18),
+        ),
+      ));
+    } else if (subscription.status == SubStatus.canceled) {
+      icons.add(const Tooltip(
+        showDuration: Duration(seconds: 4),
+        triggerMode: TooltipTriggerMode.tap,
+        message: 'Canceled',
+        child: Padding(
+          padding: EdgeInsets.only(right: 8),
+          child: Icon(Icons.cancel, color: Colors.red, size: 18),
+        ),
+      ));
+    }
+
+    // Trial
+    if (subscription.isTrial) {
+      final daysLeft = subscription.trialEndDate?.difference(now).inDays;
+      // Only show if trialEndDate is null (indefinite) or not passed (daysLeft >= 0)
+      // Only show if trialEndDate is null (indefinite) or not passed (daysLeft >= 0)
+      if (daysLeft == null || daysLeft >= 0) {
+        String msg = 'Free Trial';
+        if (subscription.trialEndDate != null) {
+          final dateStr = DateFormat.yMMMd().format(subscription.trialEndDate!);
+          msg = 'Trial ends $dateStr (${daysLeft ?? 0} days)';
+        }
+        icons.add(Tooltip(
+          showDuration: const Duration(seconds: 4),
+          triggerMode: TooltipTriggerMode.tap,
+          message: msg,
+          child: const Padding(
+            padding: EdgeInsets.only(right: 8),
+            child: Icon(Icons.card_giftcard, color: Colors.green, size: 18),
+          ),
+        ));
+      }
+    }
+
+    // Contract
+    if (subscription.contractEndDate != null &&
+        subscription.contractEndDate!.isAfter(now)) {
+      icons.add(Tooltip(
+        showDuration: const Duration(seconds: 4),
+        triggerMode: TooltipTriggerMode.tap,
+        message:
+            'Contract ends ${DateFormat.yMMMd().format(subscription.contractEndDate!)}',
+        child: const Padding(
+          padding: EdgeInsets.only(right: 8),
+          child:
+              Icon(Icons.description_outlined, color: Colors.purple, size: 18),
+        ),
+      ));
+    }
+
+    // Renewal Due (Long term cycles only to avoid noise on monthly)
+    final isLongTerm = subscription.cycle == BillingCycle.yearly ||
+        subscription.cycle == BillingCycle.quarterly;
+    if (isLongTerm &&
+        nextDate.month == now.month &&
+        nextDate.year == now.year) {
+      icons.add(Tooltip(
+        showDuration: const Duration(seconds: 4),
+        triggerMode: TooltipTriggerMode.tap,
+        message: 'Renewal due ${DateFormat.yMMMd().format(nextDate)}',
+        child: const Padding(
+          padding: EdgeInsets.only(right: 8),
+          child: Icon(Icons.update, color: Colors.amber, size: 18),
+        ),
+      ));
+    }
+
+    if (icons.isEmpty) return const SizedBox.shrink();
+
+    return Row(children: icons);
   }
 }

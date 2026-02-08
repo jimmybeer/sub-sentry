@@ -7,6 +7,8 @@ import '../../analysis/presentation/widgets/breakdown_chart.dart';
 import '../../analysis/presentation/widgets/pulse_chart.dart';
 import '../../subscriptions/presentation/providers/subscription_controller.dart';
 import '../../subscriptions/presentation/widgets/subscription_card.dart';
+import '../../subscriptions/domain/subscription.dart';
+import '../../settings/presentation/providers/settings_controller.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -23,6 +25,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final asyncSubs = ref.watch(subscriptionControllerProvider);
     final stats = ref.watch(statsProvider);
     final selectedMonth = ref.watch(selectedMonthProvider);
+    final settingsAsync = ref.watch(settingsControllerProvider);
+    final payDays = settingsAsync.valueOrNull?.payDays ?? [];
 
     return Scaffold(
       appBar: AppBar(
@@ -38,6 +42,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       body: asyncSubs.hasValue
           ? Column(
               children: [
+                // Expired Contracts Alert
+                if (asyncSubs.value != null)
+                  _buildExpiredContractsBanner(context, ref, asyncSubs.value!),
+
                 // Month Selector
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -125,7 +133,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           duration: const Duration(milliseconds: 300),
                           child: _selectedTabIndex == 0
                               ? PulseChart(
-                                  key: const ValueKey('Pulse'), stats: stats)
+                                  key: const ValueKey('Pulse'),
+                                  stats: stats,
+                                  payDays: payDays,
+                                  showWeekends: settingsAsync.valueOrNull
+                                          ?.autoShiftWeekendPayments ??
+                                      false,
+                                )
                               : BreakdownChart(
                                   key: const ValueKey('Breakdown'),
                                   stats: stats),
@@ -217,6 +231,128 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildExpiredContractsBanner(
+      BuildContext context, WidgetRef ref, List<Subscription> subs) {
+    final now = DateTime.now();
+    final expired = subs
+        .where((s) =>
+            s.contractEndDate != null &&
+            s.contractEndDate!.isBefore(now) &&
+            s.status == SubStatus.active)
+        .toList();
+
+    if (expired.isEmpty) return const SizedBox.shrink();
+
+    return MaterialBanner(
+      content: Text(
+        '${expired.length} subscription${expired.length > 1 ? 's' : ''} passed contract end date.',
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      leading: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+      backgroundColor: Colors.orange.withOpacity(0.1),
+      actions: [
+        TextButton(
+          onPressed: () => _showExpiredContractsDialog(context, ref, expired),
+          child: const Text('REVIEW'),
+        ),
+      ],
+    );
+  }
+
+  void _showExpiredContractsDialog(
+      BuildContext context, WidgetRef ref, List<Subscription> expiredSubs) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Review Expired Contracts'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: expiredSubs.length,
+            separatorBuilder: (_, __) => const Divider(),
+            itemBuilder: (ctx, index) {
+              final sub = expiredSubs[index];
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(sub.name,
+                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Ended: ${DateFormat.yMMMd().format(sub.contractEndDate!)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      OutlinedButton(
+                        onPressed: () {
+                          // Edit / Renew
+                          Navigator.pop(ctx);
+                          context.push('/home/edit/${sub.id}');
+                        },
+                        child: const Text('Renew / Update'),
+                      ),
+                      OutlinedButton(
+                        onPressed: () {
+                          // Set to Rolling (Clear contract end date)
+                          final updated = Subscription(
+                            id: sub.id,
+                            name: sub.name,
+                            cost: sub.cost,
+                            cycle: sub.cycle,
+                            firstBillDate: sub.firstBillDate,
+                            category: sub.category,
+                            colorHex: sub.colorHex,
+                            status: sub.status,
+                            contractEndDate: null, // Cleared
+                            // Copy others
+                            nextBillOverride: sub.nextBillOverride,
+                            paymentSource: sub.paymentSource,
+                            cancellationUrl: sub.cancellationUrl,
+                            isTrial: sub.isTrial,
+                            trialEndDate: sub.trialEndDate,
+                            notes: sub.notes,
+                          );
+                          ref
+                              .read(subscriptionControllerProvider.notifier)
+                              .updateSubscription(updated);
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('Rolling'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // Cancel
+                          final updated =
+                              sub.copyWith(status: SubStatus.canceled);
+                          ref
+                              .read(subscriptionControllerProvider.notifier)
+                              .updateSubscription(updated);
+                          Navigator.pop(ctx);
+                        },
+                        style:
+                            TextButton.styleFrom(foregroundColor: Colors.red),
+                        child: const Text('Cancel Sub'),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }

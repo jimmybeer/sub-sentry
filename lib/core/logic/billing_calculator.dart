@@ -41,13 +41,13 @@ class BillingCalculator {
           candidate = candidate.add(const Duration(days: 7));
           break;
         case BillingCycle.monthly:
-          candidate = addMonths(candidate, 1);
+          candidate = addMonths(candidate, 1, anchorDay: firstBillDate.day);
           break;
         case BillingCycle.quarterly:
-          candidate = addMonths(candidate, 3);
+          candidate = addMonths(candidate, 3, anchorDay: firstBillDate.day);
           break;
         case BillingCycle.yearly:
-          candidate = addMonths(candidate, 12);
+          candidate = addMonths(candidate, 12, anchorDay: firstBillDate.day);
           break;
       }
     }
@@ -55,7 +55,7 @@ class BillingCalculator {
     return candidate;
   }
 
-  static DateTime addMonths(DateTime date, int monthsToAdd) {
+  static DateTime addMonths(DateTime date, int monthsToAdd, {int? anchorDay}) {
     var newYear = date.year;
     var newMonth = date.month + monthsToAdd;
 
@@ -68,12 +68,10 @@ class BillingCalculator {
     var y = totalMonths ~/ 12;
     var m = (totalMonths % 12) + 1;
 
-    // Clamp Day
-    var d = date.day;
-    final lastDayOfMonth = DateTime(y, m + 1, 0).day;
-    if (d > lastDayOfMonth) {
-      d = lastDayOfMonth;
-    }
+    // Overflow Logic (Requested Feature)
+    // If d > lastDayOfMonth, we allow DateTime to wrap into the next month.
+    // E.g. 31st Jan -> 1 Month -> 31st Feb (Invalid) -> DateTime handles as 3rd March (or 2nd if leap).
+    var d = anchorDay ?? date.day;
 
     return DateTime(y, m, d, date.hour, date.minute);
   }

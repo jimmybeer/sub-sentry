@@ -50,6 +50,9 @@ class SubscriptionModel extends HiveObject {
   @HiveField(14)
   late String? notes;
 
+  @HiveField(15, defaultValue: false)
+  late bool ignoreWeekendShift;
+
   SubscriptionModel({
     required this.id,
     required this.name,
@@ -66,6 +69,7 @@ class SubscriptionModel extends HiveObject {
     required this.trialEndDate,
     required this.contractEndDate,
     required this.notes,
+    this.ignoreWeekendShift = false,
   });
 
   factory SubscriptionModel.fromEntity(Subscription sub) {
@@ -85,6 +89,7 @@ class SubscriptionModel extends HiveObject {
       trialEndDate: sub.trialEndDate,
       contractEndDate: sub.contractEndDate,
       notes: sub.notes,
+      ignoreWeekendShift: sub.ignoreWeekendShift,
     );
   }
 
@@ -105,6 +110,7 @@ class SubscriptionModel extends HiveObject {
       trialEndDate: trialEndDate,
       contractEndDate: contractEndDate,
       notes: notes,
+      ignoreWeekendShift: ignoreWeekendShift,
     );
   }
 }

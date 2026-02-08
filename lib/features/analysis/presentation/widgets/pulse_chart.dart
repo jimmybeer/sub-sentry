@@ -5,8 +5,14 @@ import '../../logic/subscription_stats_logic.dart';
 
 class PulseChart extends StatefulWidget {
   final SubscriptionStats stats;
+  final List<int> payDays;
+  final bool showWeekends;
 
-  const PulseChart({super.key, required this.stats});
+  const PulseChart(
+      {super.key,
+      required this.stats,
+      this.payDays = const [],
+      this.showWeekends = false});
 
   @override
   State<PulseChart> createState() => _PulseChartState();
@@ -14,6 +20,27 @@ class PulseChart extends StatefulWidget {
 
 class _PulseChartState extends State<PulseChart> {
   bool _showCumulative = true;
+
+  List<VerticalRangeAnnotation> _getWeekendRanges(
+      int year, int month, int daysInMonth, BuildContext context) {
+    final ranges = <VerticalRangeAnnotation>[];
+    for (int day = 1; day <= daysInMonth; day++) {
+      final date = DateTime(year, month, day);
+      if (date.weekday == DateTime.saturday ||
+          date.weekday == DateTime.sunday) {
+        ranges.add(
+          VerticalRangeAnnotation(
+            x1: day - 0.5,
+            x2: day + 0.5,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey.withOpacity(0.1)
+                : Colors.grey.withOpacity(0.1),
+          ),
+        );
+      }
+    }
+    return ranges;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +76,11 @@ class _PulseChartState extends State<PulseChart> {
         barRods: [
           BarChartRodData(
             toY: value,
-            color:
-                value > 0 ? Theme.of(context).primaryColor : Colors.transparent,
+            color: value > 0
+                ? (Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF4DD0E1)
+                    : Theme.of(context).primaryColor)
+                : Colors.transparent,
             width: daysInMonth > 30 ? 6 : 7,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
             backDrawRodData: BackgroundBarChartRodData(
@@ -169,7 +199,16 @@ class _PulseChartState extends State<PulseChart> {
                     borderData: FlBorderData(show: false),
                     barGroups: barGroups,
                     barTouchData: BarTouchData(
-                      enabled: false, // Let Line handle touch? Or complicated.
+                      enabled: !_showCumulative, // Enable if line is hidden
+                      touchTooltipData: BarTouchTooltipData(
+                        getTooltipColor: (_) => Colors.blueGrey,
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          return BarTooltipItem(
+                            'Day ${group.x.toInt()}\n£${rod.toY.toStringAsFixed(2)}',
+                            const TextStyle(color: Colors.white),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -186,6 +225,11 @@ class _PulseChartState extends State<PulseChart> {
                           getTitlesData(showLabels: false), // Spacer Only
                       gridData: const FlGridData(show: false),
                       borderData: FlBorderData(show: false),
+                      rangeAnnotations: RangeAnnotations(
+                          verticalRangeAnnotations: widget.showWeekends
+                              ? _getWeekendRanges(
+                                  year, month, daysInMonth, context)
+                              : []),
                       lineBarsData: [
                         LineChartBarData(
                           spots: cumulativeSpots,
@@ -222,6 +266,58 @@ class _PulseChartState extends State<PulseChart> {
                       ),
                     ),
                   ),
+
+                // Layer 3: Payday Indicators (Always Top)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: LineChart(
+                      LineChartData(
+                        minX: 0.5,
+                        maxX: daysInMonth + 0.5,
+                        minY: 0,
+                        maxY: sharedMaxY,
+                        titlesData: getTitlesData(showLabels: false),
+                        gridData: const FlGridData(show: false),
+                        borderData: FlBorderData(show: false),
+                        lineBarsData: [
+                          // Dummy line to force random
+                          LineChartBarData(
+                            spots: [
+                              const FlSpot(1, 0),
+                              FlSpot(daysInMonth.toDouble(), 0)
+                            ],
+                            color: Colors.transparent,
+                            dotData: const FlDotData(show: false),
+                          ),
+                        ],
+                        extraLinesData: ExtraLinesData(
+                          verticalLines: widget.payDays
+                              .where((d) => d <= daysInMonth)
+                              .map((day) {
+                            return VerticalLine(
+                              x: day.toDouble(),
+                              color: Colors.green, // Stronger opacity
+                              strokeWidth: 2, // Thicker
+                              dashArray: [4, 4],
+                              label: VerticalLineLabel(
+                                show: true,
+                                alignment: Alignment.topRight,
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  height: 0.8,
+                                ),
+                                labelResolver: (_) => 'PAY',
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        lineTouchData: const LineTouchData(enabled: false),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

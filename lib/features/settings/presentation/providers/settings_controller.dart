@@ -8,22 +8,31 @@ class SettingsState {
   final ThemeMode themeMode;
   final String currencyCode;
   final bool hasSeenOnboarding;
+  final List<int> payDays;
+  final bool autoShiftWeekendPayments;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
     this.currencyCode = 'GBP',
     this.hasSeenOnboarding = false,
+    this.payDays = const [],
+    this.autoShiftWeekendPayments = false,
   });
 
   SettingsState copyWith({
     ThemeMode? themeMode,
     String? currencyCode,
     bool? hasSeenOnboarding,
+    List<int>? payDays,
+    bool? autoShiftWeekendPayments,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
       currencyCode: currencyCode ?? this.currencyCode,
       hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
+      payDays: payDays ?? this.payDays,
+      autoShiftWeekendPayments:
+          autoShiftWeekendPayments ?? this.autoShiftWeekendPayments,
     );
   }
 }
@@ -42,28 +51,52 @@ class SettingsController extends AsyncNotifier<SettingsState> {
 
     final currency = _box.get('currency', defaultValue: 'GBP');
     final seenOnboarding = _box.get('onboarding_complete', defaultValue: false);
+    final payDays = _box.get('pay_days', defaultValue: <int>[]);
+    final autoShift = _box.get('auto_shift_weekend', defaultValue: false);
 
     return SettingsState(
       themeMode: mode,
       currencyCode: currency,
       hasSeenOnboarding: seenOnboarding,
+      payDays: List<int>.from(payDays),
+      autoShiftWeekendPayments: autoShift,
     );
   }
 
   Future<void> toggleTheme(bool isDark) async {
     final newMode = isDark ? ThemeMode.dark : ThemeMode.light;
     await _box.put('theme_mode', isDark ? 'dark' : 'light');
-    state = AsyncData(state.value!.copyWith(themeMode: newMode));
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(themeMode: newMode));
+    }
   }
 
   Future<void> setCurrency(String code) async {
     await _box.put('currency', code);
-    state = AsyncData(state.value!.copyWith(currencyCode: code));
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(currencyCode: code));
+    }
+  }
+
+  Future<void> setPayDays(List<int> days) async {
+    await _box.put('pay_days', days);
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(payDays: days));
+    }
+  }
+
+  Future<void> toggleAutoShiftWeekendPayments(bool value) async {
+    await _box.put('auto_shift_weekend', value);
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(autoShiftWeekendPayments: value));
+    }
   }
 
   Future<void> completeOnboarding() async {
     await _box.put('onboarding_complete', true);
-    state = AsyncData(state.value!.copyWith(hasSeenOnboarding: true));
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(hasSeenOnboarding: true));
+    }
   }
 
   Future<void> wipeData() async {

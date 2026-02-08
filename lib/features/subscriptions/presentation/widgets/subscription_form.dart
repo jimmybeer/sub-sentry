@@ -39,6 +39,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
   DateTime? _nextBillOverride;
   late TextEditingController _paymentSourceController;
   late TextEditingController _notesController;
+  bool _ignoreWeekendShift = false;
 
   @override
   void initState() {
@@ -68,6 +69,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
     _paymentSourceController =
         TextEditingController(text: data?.paymentSource ?? '');
     _notesController = TextEditingController(text: data?.notes ?? '');
+    _ignoreWeekendShift = data?.ignoreWeekendShift ?? false;
   }
 
   Color _parseColorHex(String hex) {
@@ -91,6 +93,17 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
+      if (_isTrial && _trialEndDate == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text(
+                    'Please select a Trial End Date for trial subscriptions')),
+          );
+        }
+        return;
+      }
+
       final id = widget.initialData?.id ?? const Uuid().v4();
       final name = _nameController.text.trim();
       final cost = double.parse(_costController.text.trim());
@@ -115,6 +128,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
             ? null
             : _notesController.text.trim(),
         nextBillOverride: _nextBillOverride,
+        ignoreWeekendShift: _ignoreWeekendShift,
       );
 
       widget.onSave(sub);
@@ -281,6 +295,14 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                   subtitle: Text(_getPaymentDateDescription()),
                   trailing: const Icon(Icons.calendar_today),
                   onTap: _pickBillDate,
+                ),
+                const Divider(),
+
+                SwitchListTile(
+                  title: const Text('Ignore Weekend Auto-Move'),
+                  subtitle: const Text('Always charge on the exact date'),
+                  value: _ignoreWeekendShift,
+                  onChanged: (v) => setState(() => _ignoreWeekendShift = v),
                 ),
                 const Divider(),
 

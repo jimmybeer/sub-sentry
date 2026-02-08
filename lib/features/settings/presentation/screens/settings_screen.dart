@@ -56,6 +56,33 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const Divider(),
 
+            // Pay Days
+            ListTile(
+              leading: const Icon(Icons.calendar_month),
+              title: const Text('Pay Days'),
+              subtitle: Text(settings.payDays.isEmpty
+                  ? 'None set'
+                  : settings.payDays.map((d) => _ordinal(d)).join(', ')),
+              onTap: () => _showPayDayPicker(context, ref, settings.payDays),
+            ),
+            const Divider(),
+
+            // Auto Shift Weekend Payments
+            ListTile(
+              leading: const Icon(Icons.calendar_view_week),
+              title: const Text('Auto-Shift Weekend Payments'),
+              subtitle: const Text('Move Sat/Sun payments to Monday'),
+              trailing: Switch(
+                value: settings.autoShiftWeekendPayments,
+                onChanged: (val) {
+                  ref
+                      .read(settingsControllerProvider.notifier)
+                      .toggleAutoShiftWeekendPayments(val);
+                },
+              ),
+            ),
+            const Divider(),
+
             // Generate Test Data (Development Helper)
             ListTile(
               leading: const Icon(Icons.science, color: Colors.blue),
@@ -148,6 +175,79 @@ class SettingsScreen extends ConsumerWidget {
             child: const Text('Wipe Everything'),
           ),
         ],
+      ),
+    );
+  }
+
+  String _ordinal(int number) {
+    if (number % 100 >= 11 && number % 100 <= 13) {
+      return '${number}th';
+    }
+    switch (number % 10) {
+      case 1:
+        return '${number}st';
+      case 2:
+        return '${number}nd';
+      case 3:
+        return '${number}rd';
+      default:
+        return '${number}th';
+    }
+  }
+
+  void _showPayDayPicker(
+      BuildContext context, WidgetRef ref, List<int> currentDays) {
+    final selected = Set<int>.from(currentDays);
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Select Pay Days'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: List.generate(31, (index) {
+                    final day = index + 1;
+                    final isSelected = selected.contains(day);
+                    return FilterChip(
+                      label: Text(day.toString()),
+                      selected: isSelected,
+                      onSelected: (val) {
+                        setState(() {
+                          if (val) {
+                            selected.add(day);
+                          } else {
+                            selected.remove(day);
+                          }
+                        });
+                      },
+                    );
+                  }),
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final sorted = selected.toList()..sort();
+                  ref
+                      .read(settingsControllerProvider.notifier)
+                      .setPayDays(sorted);
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -23,6 +23,7 @@ class Subscription {
   final DateTime? trialEndDate;
   final DateTime? contractEndDate;
   final String? notes;
+  final bool ignoreWeekendShift;
 
   const Subscription({
     required this.id,
@@ -40,6 +41,7 @@ class Subscription {
     this.trialEndDate,
     this.contractEndDate,
     this.notes,
+    this.ignoreWeekendShift = false,
   });
 
   Subscription copyWith({
@@ -58,6 +60,7 @@ class Subscription {
     DateTime? trialEndDate,
     DateTime? contractEndDate,
     String? notes,
+    bool? ignoreWeekendShift,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -75,6 +78,7 @@ class Subscription {
       trialEndDate: trialEndDate ?? this.trialEndDate,
       contractEndDate: contractEndDate ?? this.contractEndDate,
       notes: notes ?? this.notes,
+      ignoreWeekendShift: ignoreWeekendShift ?? this.ignoreWeekendShift,
     );
   }
 
@@ -97,7 +101,8 @@ class Subscription {
         other.isTrial == isTrial &&
         other.trialEndDate == trialEndDate &&
         other.contractEndDate == contractEndDate &&
-        other.notes == notes;
+        other.notes == notes &&
+        other.ignoreWeekendShift == ignoreWeekendShift;
   }
 
   @override
@@ -116,11 +121,12 @@ class Subscription {
         isTrial.hashCode ^
         trialEndDate.hashCode ^
         contractEndDate.hashCode ^
-        notes.hashCode;
+        notes.hashCode ^
+        ignoreWeekendShift.hashCode;
   }
 
   @override
   String toString() {
-    return 'Subscription(id: $id, name: $name, cost: $cost, cycle: $cycle, firstBillDate: $firstBillDate, category: $category, status: $status)';
+    return 'Subscription(id: $id, name: $name, cost: $cost, cycle: $cycle, firstBillDate: $firstBillDate, category: $category, status: $status, ignoreWeekendShift: $ignoreWeekendShift)';
   }
 }

@@ -11,21 +11,60 @@ import 'features/subscriptions/presentation/providers/subscription_controller.da
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
 
-  // Register Adapters
-  Hive.registerAdapter(SubscriptionModelAdapter());
+  try {
+    await Hive.initFlutter();
 
-  // Open Box
-  final box = await Hive.openBox<SubscriptionModel>('subscriptions');
-  final repository = HiveSubscriptionRepository(box);
+    // Register Adapters
+    Hive.registerAdapter(SubscriptionModelAdapter());
 
-  runApp(ProviderScope(
-    overrides: [
-      subscriptionRepositoryProvider.overrideWithValue(repository),
-    ],
-    child: const SubSentryApp(),
-  ));
+    // Open Box
+    final box = await Hive.openBox<SubscriptionModel>('subscriptions');
+    final repository = HiveSubscriptionRepository(box);
+
+    runApp(ProviderScope(
+      overrides: [
+        subscriptionRepositoryProvider.overrideWithValue(repository),
+      ],
+      child: const SubSentryApp(),
+    ));
+  } catch (e, stack) {
+    debugPrint('Initialization Error: $e');
+    debugPrint(stack.toString());
+
+    // Attempt Recovery: Delete corrupted box and retry
+    try {
+      debugPrint('Attempting to recover by deleting box...');
+      await Hive.deleteBoxFromDisk('subscriptions');
+      final box = await Hive.openBox<SubscriptionModel>('subscriptions');
+      final repository = HiveSubscriptionRepository(box);
+
+      runApp(ProviderScope(
+        overrides: [
+          subscriptionRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const SubSentryApp(),
+      ));
+      return; // Return if recovery successful
+    } catch (e2, stack2) {
+      debugPrint('Recovery Failed: $e2');
+      debugPrint(stack2.toString());
+      runApp(MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Fatal Error: Failed to initialize app even after recovery.\n$e\n\nRecovery Error:\n$e2',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+          ),
+        ),
+      ));
+    }
+  }
 }
 
 class SubSentryApp extends ConsumerWidget {

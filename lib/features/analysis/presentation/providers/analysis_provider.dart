@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../settings/presentation/providers/settings_controller.dart';
 import '../../../../features/subscriptions/presentation/providers/subscription_controller.dart';
 import '../../logic/subscription_stats_logic.dart';
 
@@ -11,9 +12,15 @@ final selectedMonthProvider = StateProvider<DateTime>((ref) {
 final statsProvider = Provider.autoDispose<SubscriptionStats>((ref) {
   final asyncSubs = ref.watch(subscriptionControllerProvider);
   final month = ref.watch(selectedMonthProvider);
+  final settings = ref.watch(settingsControllerProvider).value;
+  final autoShift = settings?.autoShiftWeekendPayments ?? false;
 
   return asyncSubs.when(
-    data: (subs) => SubscriptionStatsLogic.calculate(subs, month: month),
+    data: (subs) => SubscriptionStatsLogic.calculate(
+      subs,
+      month: month,
+      autoShiftWeekendPayments: autoShift,
+    ),
     error: (_, __) => SubscriptionStats.empty(),
     loading: () => SubscriptionStats.empty(),
   );

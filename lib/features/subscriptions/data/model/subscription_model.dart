@@ -53,6 +53,9 @@ class SubscriptionModel extends HiveObject {
   @HiveField(15, defaultValue: false)
   late bool ignoreWeekendShift;
 
+  @HiveField(16, defaultValue: true)
+  late bool includeInWeeklySummary;
+
   SubscriptionModel({
     required this.id,
     required this.name,
@@ -70,6 +73,7 @@ class SubscriptionModel extends HiveObject {
     required this.contractEndDate,
     required this.notes,
     this.ignoreWeekendShift = false,
+    this.includeInWeeklySummary = true,
   });
 
   factory SubscriptionModel.fromEntity(Subscription sub) {
@@ -90,6 +94,7 @@ class SubscriptionModel extends HiveObject {
       contractEndDate: sub.contractEndDate,
       notes: sub.notes,
       ignoreWeekendShift: sub.ignoreWeekendShift,
+      includeInWeeklySummary: sub.includeInWeeklySummary,
     );
   }
 
@@ -111,6 +116,7 @@ class SubscriptionModel extends HiveObject {
       contractEndDate: contractEndDate,
       notes: notes,
       ignoreWeekendShift: ignoreWeekendShift,
+      includeInWeeklySummary: includeInWeeklySummary,
     );
   }
 }

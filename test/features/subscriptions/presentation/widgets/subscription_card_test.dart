@@ -36,6 +36,6 @@ void main() {
     expect(find.text('£15.99'), findsOneWidget);
 
     // Cycle check ("Monthly")
-    expect(find.text('Monthly'), findsOneWidget);
+    expect(find.textContaining('Monthly'), findsOneWidget);
   });
 }

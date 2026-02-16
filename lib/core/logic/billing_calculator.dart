@@ -6,6 +6,7 @@ class BillingCalculator {
     BillingCycle cycle, {
     DateTime? overrideDate,
     DateTime? referenceDate,
+    bool ignoreWeekendShift = false,
   }) {
     final now = referenceDate ?? DateTime.now();
 
@@ -41,13 +42,19 @@ class BillingCalculator {
           candidate = candidate.add(const Duration(days: 7));
           break;
         case BillingCycle.monthly:
-          candidate = addMonths(candidate, 1, anchorDay: firstBillDate.day);
+          candidate = addMonths(candidate, 1,
+              anchorDay: firstBillDate.day,
+              ignoreWeekendShift: ignoreWeekendShift);
           break;
         case BillingCycle.quarterly:
-          candidate = addMonths(candidate, 3, anchorDay: firstBillDate.day);
+          candidate = addMonths(candidate, 3,
+              anchorDay: firstBillDate.day,
+              ignoreWeekendShift: ignoreWeekendShift);
           break;
         case BillingCycle.yearly:
-          candidate = addMonths(candidate, 12, anchorDay: firstBillDate.day);
+          candidate = addMonths(candidate, 12,
+              anchorDay: firstBillDate.day,
+              ignoreWeekendShift: ignoreWeekendShift);
           break;
       }
     }
@@ -55,23 +62,36 @@ class BillingCalculator {
     return candidate;
   }
 
-  static DateTime addMonths(DateTime date, int monthsToAdd, {int? anchorDay}) {
-    var newYear = date.year;
-    var newMonth = date.month + monthsToAdd;
+  static DateTime addMonths(DateTime date, int monthsToAdd,
+      {int? anchorDay, bool ignoreWeekendShift = false}) {
+    // Calculate total months to determine target year and month
+    var totalMonths = (date.year * 12) + (date.month - 1) + monthsToAdd;
 
-    // Normalize month/year (Handling wrap around)
-    // Month is 1-based.
-    // (month - 1) gives 0-11 index.
-    var totalMonths = (newYear * 12) + (newMonth - 1);
-
-    // Reconstruct
     var y = totalMonths ~/ 12;
     var m = (totalMonths % 12) + 1;
 
-    // Overflow Logic (Requested Feature)
-    // If d > lastDayOfMonth, we allow DateTime to wrap into the next month.
-    // E.g. 31st Jan -> 1 Month -> 31st Feb (Invalid) -> DateTime handles as 3rd March (or 2nd if leap).
+    // Determine target day, preferring anchorDay if provided
     var d = anchorDay ?? date.day;
+
+    // Handle "short months" (e.g. target is Feb, day is 31)
+    // DateTime(y, m + 1, 0).day gives the last day of month m
+    int daysInTargetMonth = DateTime(y, m + 1, 0).day;
+
+    if (d > daysInTargetMonth) {
+      d = daysInTargetMonth;
+
+      if (!ignoreWeekendShift) {
+        // Find last available working day in this month
+        DateTime targetDate = DateTime(y, m, d);
+        if (targetDate.weekday == DateTime.saturday) {
+          targetDate = targetDate.subtract(const Duration(days: 1));
+          d = targetDate.day;
+        } else if (targetDate.weekday == DateTime.sunday) {
+          targetDate = targetDate.subtract(const Duration(days: 2));
+          d = targetDate.day;
+        }
+      }
+    }
 
     return DateTime(y, m, d, date.hour, date.minute);
   }

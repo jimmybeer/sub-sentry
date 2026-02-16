@@ -120,13 +120,16 @@ class SubscriptionStatsLogic {
             return sub.firstBillDate.add(Duration(days: index * 7));
           case BillingCycle.monthly:
             return BillingCalculator.addMonths(sub.firstBillDate, index,
-                anchorDay: sub.firstBillDate.day);
+                anchorDay: sub.firstBillDate.day,
+                ignoreWeekendShift: sub.ignoreWeekendShift);
           case BillingCycle.quarterly:
             return BillingCalculator.addMonths(sub.firstBillDate, index * 3,
-                anchorDay: sub.firstBillDate.day);
+                anchorDay: sub.firstBillDate.day,
+                ignoreWeekendShift: sub.ignoreWeekendShift);
           case BillingCycle.yearly:
             return BillingCalculator.addMonths(sub.firstBillDate, index * 12,
-                anchorDay: sub.firstBillDate.day);
+                anchorDay: sub.firstBillDate.day,
+                ignoreWeekendShift: sub.ignoreWeekendShift);
         }
       }
 

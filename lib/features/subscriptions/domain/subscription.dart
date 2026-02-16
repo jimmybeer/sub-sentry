@@ -24,6 +24,7 @@ class Subscription {
   final DateTime? contractEndDate;
   final String? notes;
   final bool ignoreWeekendShift;
+  final bool includeInWeeklySummary;
 
   const Subscription({
     required this.id,
@@ -42,6 +43,7 @@ class Subscription {
     this.contractEndDate,
     this.notes,
     this.ignoreWeekendShift = false,
+    this.includeInWeeklySummary = true,
   });
 
   Subscription copyWith({
@@ -61,6 +63,7 @@ class Subscription {
     DateTime? contractEndDate,
     String? notes,
     bool? ignoreWeekendShift,
+    bool? includeInWeeklySummary,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -79,6 +82,8 @@ class Subscription {
       contractEndDate: contractEndDate ?? this.contractEndDate,
       notes: notes ?? this.notes,
       ignoreWeekendShift: ignoreWeekendShift ?? this.ignoreWeekendShift,
+      includeInWeeklySummary:
+          includeInWeeklySummary ?? this.includeInWeeklySummary,
     );
   }
 
@@ -102,7 +107,8 @@ class Subscription {
         other.trialEndDate == trialEndDate &&
         other.contractEndDate == contractEndDate &&
         other.notes == notes &&
-        other.ignoreWeekendShift == ignoreWeekendShift;
+        other.ignoreWeekendShift == ignoreWeekendShift &&
+        other.includeInWeeklySummary == includeInWeeklySummary;
   }
 
   @override
@@ -122,11 +128,12 @@ class Subscription {
         trialEndDate.hashCode ^
         contractEndDate.hashCode ^
         notes.hashCode ^
-        ignoreWeekendShift.hashCode;
+        ignoreWeekendShift.hashCode ^
+        includeInWeeklySummary.hashCode;
   }
 
   @override
   String toString() {
-    return 'Subscription(id: $id, name: $name, cost: $cost, cycle: $cycle, firstBillDate: $firstBillDate, category: $category, status: $status, ignoreWeekendShift: $ignoreWeekendShift)';
+    return 'Subscription(id: $id, name: $name, cost: $cost, cycle: $cycle, firstBillDate: $firstBillDate, category: $category, status: $status, ignoreWeekendShift: $ignoreWeekendShift, includeInWeeklySummary: $includeInWeeklySummary)';
   }
 }

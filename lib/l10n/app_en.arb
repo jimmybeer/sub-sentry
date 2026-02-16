@@ -1,0 +1,10 @@
+{
+  "@@locale": "en",
+  "errorStorage": "A storage error occurred. Please try again.",
+  "errorPermission": "Permission denied. Please check your settings.",
+  "errorNetwork": "A network error occurred. Please check your connection.",
+  "errorValidation": "Please check the entered information.",
+  "errorUnexpected": "An unexpected error occurred.",
+  "errorRetry": "Try Again",
+  "errorTitle": "Oops!"
+}

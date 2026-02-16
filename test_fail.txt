@@ -1,0 +1,34 @@
+﻿00:00 +0: loading C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/providers/subscription_controller_test.dart
+00:00 +0 -1: loading C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/providers/subscription_controller_test.dart [E]
+  Failed to load "C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/providers/subscription_controller_test.dart":
+  Compilation failed for testPath=C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/providers/subscription_controller_test.dart: test/features/subscriptions/presentation/providers/subscription_controller_test.dart:105:1: Error: 'class' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+  class FakeSettingsController extends AsyncNotifier<SettingsState> implements SettingsController {
+  ^^^^^
+  test/features/subscriptions/presentation/providers/subscription_controller_test.dart:105:1: Error: Expected ';' after this.
+  class FakeSettingsController extends AsyncNotifier<SettingsState> implements SettingsController {
+  ^^^^^
+  test/features/subscriptions/presentation/providers/subscription_controller_test.dart:105:1: Error: Undefined name 'class'.
+  class FakeSettingsController extends AsyncNotifier<SettingsState> implements SettingsController {
+  ^^^^^
+  test/features/subscriptions/presentation/providers/subscription_controller_test.dart:105:7: Error: Expected ';' after this.
+  class FakeSettingsController extends AsyncNotifier<SettingsState> implements SettingsController {
+        ^^^^^^^^^^^^^^^^^^^^^^
+  test/features/subscriptions/presentation/providers/subscription_controller_test.dart:105:30: Error: 'extends' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+  class FakeSettingsController extends AsyncNotifier<SettingsState> implements SettingsController {
+                               ^^^^^^^
+  test/features/subscriptions/presentation/providers/subscription_controller_test.dart:105:30: Error: Expected ';' after this.
+  class FakeSettingsController extends AsyncNotifier<SettingsState> implements SettingsController {
+                               ^^^^^^^
+  test/features/subscriptions/presentation/providers/subscription_controller_test.dart:105:30: Error: Undefined name 'extends'.
+  class FakeSettingsController extends AsyncNotifier<SettingsState> implements SettingsController {
+                               ^^^^^^^
+  test/features/subscriptions/presentation/providers/subscription_controller_test.dart:105:67: Error: Expected ';' after this.
+  class FakeSettingsController extends AsyncNotifier<SettingsState> implements SettingsController {
+                                                                    ^^^^^^^^^^
+  test/features/subscriptions/presentation/providers/subscription_controller_test.dart:105:78: Error: Expected ';' after this.
+  class FakeSettingsController extends AsyncNotifier<SettingsState> implements SettingsController {
+                                                                               ^^^^^^^^^^^^^^^^^^
+  .
+00:00 +0 -1: Some tests failed.

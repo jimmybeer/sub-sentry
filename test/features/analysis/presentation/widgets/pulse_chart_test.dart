@@ -32,8 +32,8 @@ void main() {
     // Verify Bar Chart (Daily Spend)
     expect(find.byType(BarChart), findsOneWidget);
 
-    // Verify Line Chart (Cumulative Overlay)
-    expect(find.byType(LineChart), findsOneWidget);
+    // Verify Line Chart (Cumulative Overlay + Payday Layer)
+    expect(find.byType(LineChart), findsNWidgets(2));
 
     // Verify axis values or tooltip behavior logic is implicitly covered by existence for now.
 

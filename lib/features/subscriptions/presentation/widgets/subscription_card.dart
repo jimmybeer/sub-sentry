@@ -28,7 +28,8 @@ class SubscriptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final nextDate = BillingCalculator.calculateNextBillDate(
         subscription.firstBillDate, subscription.cycle,
-        overrideDate: subscription.nextBillOverride);
+        overrideDate: subscription.nextBillOverride,
+        ignoreWeekendShift: subscription.ignoreWeekendShift);
 
     final costStr =
         NumberFormat.simpleCurrency(locale: 'en_GB').format(subscription.cost);

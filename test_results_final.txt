@@ -1,0 +1,150 @@
+﻿00:00 +0: loading C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart
+00:00 +0: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Weekly: Should calculate next week
+00:00 +1: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Monthly: Should calculate next month (simple)
+00:00 +2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Monthly: Should handle short months (Jan 31 -> Feb 29 for Leap Year)
+00:00 +2 -1: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Monthly: Should handle short months (Jan 31 -> Feb 29 for Leap Year) [E]
+  Expected: DateTime:<2024-02-29 00:00:00.000>
+    Actual: DateTime:<2024-03-02 00:00:00.000>
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test\core\logic\billing_calculator_test.dart 35:7   main.<fn>.<fn>
+  
+00:00 +2 -1: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Monthly: Should handle short months (Jan 31 -> Feb 28 for Non-Leap)
+00:00 +2 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Monthly: Should handle short months (Jan 31 -> Feb 28 for Non-Leap) [E]
+  Expected: DateTime:<2023-02-28 00:00:00.000>
+    Actual: DateTime:<2023-03-03 00:00:00.000>
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test\core\logic\billing_calculator_test.dart 46:7   main.<fn>.<fn>
+  
+00:00 +2 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Quarterly: Should add 3 months
+00:00 +3 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Yearly: Should add 1 year
+00:00 +4 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Override: Should respect user override if in future
+00:00 +5 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/core/logic/billing_calculator_test.dart: BillingCalculator Past Due: Should find next future date if multiple cycles passed
+00:00 +6 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/analysis/logic/subscription_stats_test.dart: Calculates normalized monthly cost correctly
+00:00 +7 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/analysis/logic/subscription_stats_test.dart: Calculates cashflow for Feb 2024
+00:00 +8 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/analysis/logic/subscription_stats_test.dart: Calculates category breakdown based on normalized cost
+00:00 +9 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/analysis/logic/subscription_stats_test.dart: Calculates actual category breakdown based on month cashflow
+00:01 +10 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/analysis/presentation/widgets/breakdown_chart_test.dart: BreakdownChart displays PieChart and stats
+00:02 +11 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/analysis/presentation/widgets/pulse_chart_test.dart: PulseChart renders bar chart and line overlay
+00:02 +12 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/analysis/presentation/widgets/pulse_chart_test.dart: PulseChart renders bar chart and line overlay
+00:02 +13 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/analysis/presentation/widgets/pulse_chart_test.dart: PulseChart renders bar chart and line overlay
+00:02 +14 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/analysis/presentation/widgets/pulse_chart_test.dart: PulseChart renders bar chart and line overlay
+00:03 +15 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/dashboard/presentation/dashboard_screen_test.dart: Dashboard shows subscriptions and pulse chart
+00:03 +16 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/dashboard/presentation/dashboard_screen_test.dart: Dashboard shows subscriptions and pulse chart
+00:03 +17 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/dashboard/presentation/dashboard_screen_test.dart: Dashboard shows subscriptions and pulse chart
+00:03 +18 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/dashboard/presentation/dashboard_screen_test.dart: Dashboard shows subscriptions and pulse chart
+00:04 +19 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/dashboard/presentation/dashboard_screen_test.dart: Dashboard shows subscriptions and pulse chart
+00:05 +20 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/onboarding/presentation/onboarding_screen_test.dart: Onboarding screen displays content and completes when tapped
+00:05 +21 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/onboarding/presentation/onboarding_screen_test.dart: Onboarding screen displays content and completes when tapped
+00:05 +22 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/onboarding/presentation/onboarding_screen_test.dart: Onboarding screen displays content and completes when tapped
+00:05 +23 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/onboarding/presentation/onboarding_screen_test.dart: Onboarding screen displays content and completes when tapped
+00:05 +24 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/onboarding/presentation/onboarding_screen_test.dart: Onboarding screen displays content and completes when tapped
+00:05 +25 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/onboarding/presentation/onboarding_screen_test.dart: Onboarding screen displays content and completes when tapped
+00:06 +26 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/onboarding/presentation/onboarding_screen_test.dart: Onboarding screen displays content and completes when tapped
+00:06 +27 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/add_subscription_screen_test.dart: AddSubscriptionScreen saves valid input and pops
+00:07 +28 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/add_subscription_screen_test.dart: AddSubscriptionScreen saves valid input and pops
+00:08 +28 -2: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/widgets/subscription_card_test.dart: SubscriptionCard displays subscription details
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Monthly": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/james/Documents/AntiGravity/App%20Challenge/SubEntry2/test/features/subscriptions/presentation/widgets/subscription_card_test.dart:39:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/james/Documents/AntiGravity/App%20Challenge/SubEntry2/test/features/subscriptions/presentation/widgets/subscription_card_test.dart line 39
+The test description was:
+  SubscriptionCard displays subscription details
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +28 -3: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/add_subscription_screen_test.dart: AddSubscriptionScreen saves valid input and pops
+00:08 +28 -3: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/widgets/subscription_card_test.dart: SubscriptionCard displays subscription details [E]
+  Test failed. See exception logs above.
+  The test description was: SubscriptionCard displays subscription details
+  
+00:09 +28 -3: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/add_subscription_screen_test.dart: AddSubscriptionScreen saves valid input and pops
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following LateError was thrown running a test:
+LateInitializationError: Field '_instance@771271368' has not been initialized.
+
+When the exception was thrown, this was the stack:
+#0      FlutterLocalNotificationsPlatform._instance (package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart)
+#1      FlutterLocalNotificationsPlatform.instance (package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart:20:60)
+#2      FlutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation (package:flutter_local_notifications/src/flutter_local_notifications_plugin.dart:56:43)
+#3      FlutterLocalNotificationsPlugin.initialize (package:flutter_local_notifications/src/flutter_local_notifications_plugin.dart:132:14)
+#4      NotificationService.init (package:sub_sentry/features/notifications/services/notification_service.dart:37:19)
+#5      notificationService (package:sub_sentry/features/notifications/providers/notification_provider.dart:9:11)
+#6      Provider._create (package:riverpod/src/provider/base.dart:59:57)
+#7      ProviderElement.create (package:riverpod/src/provider/base.dart:345:23)
+#8      ProviderElementBase.buildState (package:riverpod/src/framework/element.dart:426:7)
+#9      ProviderElementBase.mount (package:riverpod/src/framework/element.dart:228:5)
+#10     _StateReader._create (package:riverpod/src/framework/container.dart:47:11)
+#11     _StateReader.getElement (package:riverpod/src/framework/container.dart:35:52)
+#12     ProviderContainer.readProviderElement.<anonymous closure> (package:riverpod/src/framework/container.dart:440:40)
+#13     ProviderContainer.readProviderElement (package:riverpod/src/framework/container.dart:475:8)
+#14     ProviderElementBase._debugAssertCanDependOn.<anonymous closure> (package:riverpod/src/framework/element.dart:624:42)
+#15     ProviderElementBase._debugAssertCanDependOn (package:riverpod/src/framework/element.dart:667:8)
+#16     ProviderElementBase.read (package:riverpod/src/framework/element.dart:691:12)
+#17     SubscriptionController.build (package:sub_sentry/features/subscriptions/presentation/providers/subscription_controller.dart:39:26)
+<asynchronous suspension>
+#18     FutureHandlerProviderElementMixin.handleFuture.<anonymous closure>.<anonymous closure> (package:riverpod/src/async_notifier/base.dart:355:9)
+<asynchronous suspension>
+
+The test description was:
+  AddSubscriptionScreen saves valid input and pops
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:09 +28 -4: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/edit_subscription_screen_test.dart: EditSubscriptionScreen prefills data and updates
+00:09 +28 -4: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/add_subscription_screen_test.dart: AddSubscriptionScreen saves valid input and pops [E]
+  Test failed. See exception logs above.
+  The test description was: AddSubscriptionScreen saves valid input and pops
+  
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following HiveError was thrown running a test (but after the test had completed):
+You need to initialize Hive or provide a path to store the box.
+
+When the exception was thrown, this was the stack:
+#0      BackendManager.open (package:hive/src/backend/vm/backend_manager.dart:21:7)
+#1      HiveImpl._openBox (package:hive/src/hive_impl.dart:101:36)
+#2      HiveImpl.openBox (package:hive/src/hive_impl.dart:142:18)
+#3      SettingsController.build (package:sub_sentry/features/settings/presentation/providers/settings_controller.dart:61:23)
+#4      AsyncNotifierProviderImpl.runNotifierBuild (package:riverpod/src/async_notifier/base.dart:146:43)
+#5      AsyncNotifierProviderElement.create.<anonymous closure>.<anonymous closure> (package:riverpod/src/async_notifier/base.dart:547:26)
+#6      FutureHandlerProviderElementMixin.handleFuture.<anonymous closure> (package:riverpod/src/async_notifier/base.dart:341:30)
+#7      FutureHandlerProviderElementMixin._handleAsync (package:riverpod/src/async_notifier/base.dart:388:47)
+#8      FutureHandlerProviderElementMixin.handleFuture (package:riverpod/src/async_notifier/base.dart:335:5)
+#9      AsyncNotifierProviderElement.create.<anonymous closure> (package:riverpod/src/async_notifier/base.dart:546:9)
+#10     ResultData.when (package:riverpod/src/result.dart:82:16)
+#11     AsyncNotifierProviderElement.create (package:riverpod/src/async_notifier/base.dart:541:20)
+#12     ProviderElementBase.buildState (package:riverpod/src/framework/element.dart:426:7)
+#13     ProviderElementBase.mount (package:riverpod/src/framework/element.dart:228:5)
+#14     _StateReader._create (package:riverpod/src/framework/container.dart:47:11)
+#15     _StateReader.getElement (package:riverpod/src/framework/container.dart:35:52)
+#16     ProviderContainer.readProviderElement.<anonymous closure> (package:riverpod/src/framework/container.dart:440:40)
+#17     ProviderContainer.readProviderElement (package:riverpod/src/framework/container.dart:475:8)
+#18     ProviderElementBase._debugAssertCanDependOn.<anonymous closure> (package:riverpod/src/framework/element.dart:624:42)
+#19     ProviderElementBase._debugAssertCanDependOn (package:riverpod/src/framework/element.dart:667:8)
+#20     ProviderElementBase.watch (package:riverpod/src/framework/element.dart:714:12)
+#21     SubscriptionController.build (package:sub_sentry/features/subscriptions/presentation/providers/subscription_controller.dart:40:28)
+<asynchronous suspension>
+#22     FutureHandlerProviderElementMixin.handleFuture.<anonymous closure>.<anonymous closure> (package:riverpod/src/async_notifier/base.dart:355:9)
+<asynchronous suspension>
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  Test failed. See exception logs above.
+  The test description was: AddSubscriptionScreen saves valid input and pops
+  
+00:09 +29 -4: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/edit_subscription_screen_test.dart: EditSubscriptionScreen deletes subscription
+Notification scheduling failed: type 'Null' is not a subtype of type 'Future<void>'
+Notification scheduling failed: type 'Null' is not a subtype of type 'Future<void>'
+00:10 +30 -4: C:/Users/james/Documents/AntiGravity/App Challenge/SubEntry2/test/features/subscriptions/presentation/edit_subscription_screen_test.dart: (tearDownAll)
+00:10 +30 -4: Some tests failed.

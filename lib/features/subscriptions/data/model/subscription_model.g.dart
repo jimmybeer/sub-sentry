@@ -33,13 +33,14 @@ class SubscriptionModelAdapter extends TypeAdapter<SubscriptionModel> {
       contractEndDate: fields[13] as DateTime?,
       notes: fields[14] as String?,
       ignoreWeekendShift: fields[15] == null ? false : fields[15] as bool,
+      includeInWeeklySummary: fields[16] == null ? true : fields[16] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, SubscriptionModel obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(17)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -71,7 +72,9 @@ class SubscriptionModelAdapter extends TypeAdapter<SubscriptionModel> {
       ..writeByte(14)
       ..write(obj.notes)
       ..writeByte(15)
-      ..write(obj.ignoreWeekendShift);
+      ..write(obj.ignoreWeekendShift)
+      ..writeByte(16)
+      ..write(obj.includeInWeeklySummary);
   }
 
   @override

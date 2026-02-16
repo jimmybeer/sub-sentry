@@ -10,6 +10,10 @@ class SettingsState {
   final bool hasSeenOnboarding;
   final List<int> payDays;
   final bool autoShiftWeekendPayments;
+  final bool weeklySummaryEnabled;
+  final int weeklySummaryDay; // DateTime.monday = 1
+  final String weeklySummaryTime; // "HH:mm"
+  final bool trialAlertsEnabled;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -17,6 +21,10 @@ class SettingsState {
     this.hasSeenOnboarding = false,
     this.payDays = const [],
     this.autoShiftWeekendPayments = false,
+    this.weeklySummaryEnabled = true,
+    this.weeklySummaryDay = DateTime.monday,
+    this.weeklySummaryTime = '09:00',
+    this.trialAlertsEnabled = true,
   });
 
   SettingsState copyWith({
@@ -25,6 +33,10 @@ class SettingsState {
     bool? hasSeenOnboarding,
     List<int>? payDays,
     bool? autoShiftWeekendPayments,
+    bool? weeklySummaryEnabled,
+    int? weeklySummaryDay,
+    String? weeklySummaryTime,
+    bool? trialAlertsEnabled,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -33,6 +45,10 @@ class SettingsState {
       payDays: payDays ?? this.payDays,
       autoShiftWeekendPayments:
           autoShiftWeekendPayments ?? this.autoShiftWeekendPayments,
+      weeklySummaryEnabled: weeklySummaryEnabled ?? this.weeklySummaryEnabled,
+      weeklySummaryDay: weeklySummaryDay ?? this.weeklySummaryDay,
+      weeklySummaryTime: weeklySummaryTime ?? this.weeklySummaryTime,
+      trialAlertsEnabled: trialAlertsEnabled ?? this.trialAlertsEnabled,
     );
   }
 }
@@ -51,15 +67,23 @@ class SettingsController extends AsyncNotifier<SettingsState> {
 
     final currency = _box.get('currency', defaultValue: 'GBP');
     final seenOnboarding = _box.get('onboarding_complete', defaultValue: false);
-    final payDays = _box.get('pay_days', defaultValue: <int>[]);
+    final payDays = List<int>.from(_box.get('pay_days', defaultValue: <int>[]));
     final autoShift = _box.get('auto_shift_weekend', defaultValue: false);
+    final summaryEnabled = _box.get('summary_enabled', defaultValue: true);
+    final summaryDay = _box.get('summary_day', defaultValue: DateTime.monday);
+    final summaryTime = _box.get('summary_time', defaultValue: '09:00');
+    final trialEnabled = _box.get('trial_enabled', defaultValue: true);
 
     return SettingsState(
       themeMode: mode,
       currencyCode: currency,
       hasSeenOnboarding: seenOnboarding,
-      payDays: List<int>.from(payDays),
+      payDays: payDays,
       autoShiftWeekendPayments: autoShift,
+      weeklySummaryEnabled: summaryEnabled,
+      weeklySummaryDay: summaryDay,
+      weeklySummaryTime: summaryTime,
+      trialAlertsEnabled: trialEnabled,
     );
   }
 
@@ -96,6 +120,29 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     await _box.put('onboarding_complete', true);
     if (state.value != null) {
       state = AsyncData(state.value!.copyWith(hasSeenOnboarding: true));
+    }
+  }
+
+  Future<void> toggleWeeklySummary(bool value) async {
+    await _box.put('summary_enabled', value);
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(weeklySummaryEnabled: value));
+    }
+  }
+
+  Future<void> setWeeklySummaryTime(int day, String time) async {
+    await _box.put('summary_day', day);
+    await _box.put('summary_time', time);
+    if (state.value != null) {
+      state = AsyncData(state.value!
+          .copyWith(weeklySummaryDay: day, weeklySummaryTime: time));
+    }
+  }
+
+  Future<void> toggleTrialAlerts(bool value) async {
+    await _box.put('trial_enabled', value);
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(trialAlertsEnabled: value));
     }
   }
 

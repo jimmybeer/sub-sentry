@@ -40,6 +40,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
   late TextEditingController _paymentSourceController;
   late TextEditingController _notesController;
   bool _ignoreWeekendShift = false;
+  bool _includeInWeeklySummary = true;
 
   @override
   void initState() {
@@ -70,6 +71,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
         TextEditingController(text: data?.paymentSource ?? '');
     _notesController = TextEditingController(text: data?.notes ?? '');
     _ignoreWeekendShift = data?.ignoreWeekendShift ?? false;
+    _includeInWeeklySummary = data?.includeInWeeklySummary ?? true;
   }
 
   Color _parseColorHex(String hex) {
@@ -129,6 +131,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
             : _notesController.text.trim(),
         nextBillOverride: _nextBillOverride,
         ignoreWeekendShift: _ignoreWeekendShift,
+        includeInWeeklySummary: _includeInWeeklySummary,
       );
 
       widget.onSave(sub);
@@ -299,10 +302,17 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                 const Divider(),
 
                 SwitchListTile(
-                  title: const Text('Ignore Weekend Auto-Move'),
-                  subtitle: const Text('Always charge on the exact date'),
+                  title: const Text('Exact Date Only'),
+                  subtitle: const Text(
+                      'Do not shift payments that fall on weekends or missing month days'),
                   value: _ignoreWeekendShift,
                   onChanged: (v) => setState(() => _ignoreWeekendShift = v),
+                ),
+                SwitchListTile(
+                  title: const Text('Include in Weekly Summary'),
+                  subtitle: const Text('Show in "Coming Up" notification'),
+                  value: _includeInWeeklySummary,
+                  onChanged: (v) => setState(() => _includeInWeeklySummary = v),
                 ),
                 const Divider(),
 

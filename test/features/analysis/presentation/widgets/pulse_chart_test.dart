@@ -18,6 +18,7 @@ void main() {
       projectedCashflowTotal: 150,
       categoryBreakdown: {},
       actualCategoryBreakdown: {},
+      dailyCashflowByCategory: {},
       month: DateTime(2024, 2, 1),
     );
 

@@ -135,7 +135,7 @@ void main() {
       ProviderScope(
         overrides: [
           subscriptionRepositoryProvider.overrideWithValue(mockRepo),
-          notificationServiceProvider.overrideWithValue(mockNotify),
+          notificationServiceProvider.overrideWith((ref) => mockNotify),
           settingsControllerProvider
               .overrideWith(() => FakeSettingsController()),
         ],
@@ -215,7 +215,7 @@ void main() {
         overrides: [
           subscriptionRepositoryProvider.overrideWithValue(mockRepo),
           notificationServiceProvider
-              .overrideWithValue(MockNotificationService()),
+              .overrideWith((ref) => MockNotificationService()),
           settingsControllerProvider
               .overrideWith(() => FakeSettingsController()),
         ],

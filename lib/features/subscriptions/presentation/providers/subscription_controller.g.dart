@@ -25,7 +25,7 @@ final subscriptionRepositoryProvider =
 typedef SubscriptionRepositoryRef
     = AutoDisposeProviderRef<SubscriptionRepository>;
 String _$subscriptionControllerHash() =>
-    r'3c71a5c0114d82c19a0e5dba121f9dcd5f474f50';
+    r'57493e04b872833f1e0ce25beadbd7bfc375200f';
 
 /// See also [SubscriptionController].
 @ProviderFor(SubscriptionController)

@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -24,9 +25,10 @@ class NotificationService {
 
     const DarwinInitializationSettings iosSettings =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission:
+          false, // Don't request on init, let onboarding do it
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
     const InitializationSettings initSettings = InitializationSettings(
@@ -40,12 +42,22 @@ class NotificationService {
         // Handle tap
       },
     );
+  }
 
-    // Request permissions for Android 13+
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+  /// Request permissions via permission_handler for a consistent experience
+  Future<bool> requestPermissions() async {
+    final status = await Permission.notification.request();
+    return status.isGranted;
+  }
+
+  /// Check if notifications are enabled
+  Future<bool> areNotificationsEnabled() async {
+    return await Permission.notification.isGranted;
+  }
+
+  /// Open system settings for notifications
+  Future<void> openSettings() async {
+    await openAppSettings();
   }
 
   /// Schedule the recurring Weekly Summary
@@ -100,6 +112,30 @@ class NotificationService {
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
+  /// Show an immediate notification for testing
+  Future<void> showNotification({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    await _plugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelName,
+          channelDescription: channelDesc,
+          importance: Importance.max,
+          priority: Priority.high,
+          styleInformation: BigTextStyleInformation(''),
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
     );
   }
 

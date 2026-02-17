@@ -77,10 +77,50 @@ class AlertScheduler {
     }
 
     final end = sub.trialEndDate!;
+    // Set alerts to 9:00 AM local time for better visibility
+    // If end is 00:00, these will be 00:00 which is often missed or in the past
+    // We'll normalize the 'end' date to be the deadline, but alerts should happen during the day.
+
+    // Helper to set time to 9 AM
+    DateTime set9am(DateTime d) {
+      return DateTime(d.year, d.month, d.day, 9, 0);
+    }
+
     return [
-      end.subtract(const Duration(days: 5)),
-      end.subtract(const Duration(days: 3)),
-      end.subtract(const Duration(hours: 24)),
+      set9am(end.subtract(const Duration(days: 5))),
+      set9am(end.subtract(const Duration(days: 3))),
+      set9am(end.subtract(const Duration(days: 1))), // 1 day before at 9 AM
+      set9am(end), // Day of expiry at 9 AM
+    ];
+  }
+
+  /// Calculates renewal alerts for Yearly/Quarterly subscriptions.
+  /// usually 7 days and 1 day before.
+  static List<DateTime> calculateRenewalAlertDates(Subscription sub) {
+    // Only for long-term cycles
+    if (sub.cycle != BillingCycle.yearly &&
+        sub.cycle != BillingCycle.quarterly) {
+      return [];
+    }
+
+    // We need the *next* bill date.
+    // This is tricky because calculateNextBillDate returns the *next* one.
+    // We want to alert *before* that date.
+    final now = DateTime.now();
+    final nextBill = BillingCalculator.calculateNextBillDate(
+        sub.firstBillDate, sub.cycle,
+        overrideDate: sub.nextBillOverride,
+        referenceDate: now,
+        ignoreWeekendShift: sub.ignoreWeekendShift);
+
+    // Helper to set time to 9 AM
+    DateTime set9am(DateTime d) {
+      return DateTime(d.year, d.month, d.day, 9, 0);
+    }
+
+    return [
+      set9am(nextBill.subtract(const Duration(days: 7))),
+      set9am(nextBill.subtract(const Duration(days: 1))),
     ];
   }
 }

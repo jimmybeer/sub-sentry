@@ -5,6 +5,7 @@ class SubscriptionStats {
   final double totalNormalizedMonthlyCost;
   final double projectedCashflowTotal;
   final Map<int, double> dailyCashflow;
+  final Map<int, Map<SubCategory, double>> dailyCashflowByCategory;
   final Map<SubCategory, double> categoryBreakdown;
   final Map<SubCategory, double> actualCategoryBreakdown;
   final DateTime month;
@@ -13,6 +14,7 @@ class SubscriptionStats {
     required this.totalNormalizedMonthlyCost,
     required this.projectedCashflowTotal,
     required this.dailyCashflow,
+    required this.dailyCashflowByCategory,
     required this.categoryBreakdown,
     required this.actualCategoryBreakdown,
     required this.month,
@@ -22,6 +24,7 @@ class SubscriptionStats {
         totalNormalizedMonthlyCost: 0,
         projectedCashflowTotal: 0,
         dailyCashflow: {},
+        dailyCashflowByCategory: {},
         categoryBreakdown: {},
         actualCategoryBreakdown: {},
         month: DateTime.now(),
@@ -41,6 +44,7 @@ class SubscriptionStatsLogic {
     double totalNormalized = 0;
     double cashflowTotal = 0;
     final dailyCashflow = <int, double>{};
+    final dailyCashflowByCategory = <int, Map<SubCategory, double>>{};
     final categoryBreakdown = <SubCategory, double>{};
     final actualCategoryBreakdown = <SubCategory, double>{};
 
@@ -187,6 +191,12 @@ class SubscriptionStatsLogic {
           final day = reportDate.day;
           dailyCashflow.update(day, (val) => val + sub.cost,
               ifAbsent: () => sub.cost);
+
+          dailyCashflowByCategory.putIfAbsent(day, () => {});
+          dailyCashflowByCategory[day]!.update(
+              sub.category, (val) => val + sub.cost,
+              ifAbsent: () => sub.cost);
+
           cashflowTotal += sub.cost;
           actualCategoryBreakdown.update(sub.category, (val) => val + sub.cost,
               ifAbsent: () => sub.cost);
@@ -200,6 +210,7 @@ class SubscriptionStatsLogic {
       totalNormalizedMonthlyCost: totalNormalized,
       projectedCashflowTotal: cashflowTotal,
       dailyCashflow: dailyCashflow,
+      dailyCashflowByCategory: dailyCashflowByCategory,
       categoryBreakdown: categoryBreakdown,
       actualCategoryBreakdown: actualCategoryBreakdown,
       month: targetMonth,

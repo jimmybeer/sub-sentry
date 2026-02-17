@@ -40,7 +40,8 @@ class SubscriptionController extends _$SubscriptionController {
     });
     // Side Effect: Schedule Alerts
     try {
-      final notifyAsync = ref.watch(notificationServiceProvider);
+      final AsyncValue<NotificationService> notifyAsync =
+          ref.watch(notificationServiceProvider);
       final settings = ref.watch(settingsControllerProvider).value;
       if (notifyAsync.hasValue && settings != null) {
         await _scheduleAlerts(notifyAsync.value!, sortedSubs, settings);
@@ -88,10 +89,11 @@ class SubscriptionController extends _$SubscriptionController {
             if (date.isAfter(DateTime.now())) {
               final id = sub.id.hashCode + (i + 1);
 
-              String body = 'Your trial for ${sub.name} ends in ';
-              if (i == 0) body += '5 days.';
-              if (i == 1) body += '3 days.';
-              if (i == 2) body += '24 hours.';
+              String body = 'Your trial for ${sub.name} ends ';
+              if (i == 0) body += 'in 5 days.';
+              if (i == 1) body += 'in 3 days.';
+              if (i == 2) body += 'tomorrow.'; // 1 day before
+              if (i == 3) body += 'today.'; // Day of
 
               await notify.scheduleTrialAlert(
                 id: id,
@@ -101,6 +103,50 @@ class SubscriptionController extends _$SubscriptionController {
               );
             }
           }
+        }
+      }
+    }
+
+    // 4. Schedule Renewal Alerts (Yearly/Quarterly)
+    // New logic to catch annual subscriptions
+    for (var sub in subs) {
+      if (sub.status == SubStatus.active) {
+        final dates = AlertScheduler.calculateRenewalAlertDates(sub);
+        for (int i = 0; i < dates.length; i++) {
+          final date = dates[i];
+          if (date.isAfter(DateTime.now())) {
+            // Unique ID offset different from trial/contract
+            final id = sub.id.hashCode + 2000 + i;
+
+            String body = 'Your ${sub.name} subscription renews ';
+            if (i == 0) body += 'in 1 week.';
+            if (i == 1) body += 'tomorrow.';
+
+            await notify.scheduleTrialAlert(
+              id: id,
+              title: 'Upcoming Renewal',
+              body: body,
+              scheduledDate: date,
+            );
+          }
+        }
+      }
+    }
+
+    // 5. Schedule Contract Alerts
+    for (var sub in subs) {
+      if (sub.contractEndDate != null && sub.status == SubStatus.active) {
+        final alertDate =
+            sub.contractEndDate!.subtract(const Duration(days: 30));
+        if (alertDate.isAfter(DateTime.now())) {
+          final id = sub.id.hashCode + 999; // Offset for contract
+          await notify.scheduleTrialAlert(
+            id: id,
+            title: 'Contract Ending Soon',
+            body:
+                'Heads up: Your ${sub.name} contract ends in 30 days. Time to re-negotiate?',
+            scheduledDate: alertDate,
+          );
         }
       }
     }

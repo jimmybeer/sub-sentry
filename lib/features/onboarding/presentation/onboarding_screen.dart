@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../settings/presentation/providers/settings_controller.dart';
+import '../../notifications/providers/notification_provider.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -28,6 +29,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   _buildIntroPage(),
                   _buildCurrencyPage(),
+                  _buildNotificationPage(),
                   _buildReadyPage(),
                 ],
               ),
@@ -39,7 +41,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   // Page Indicators
                   Row(
-                    children: List.generate(3, (index) => _buildDot(index)),
+                    children: List.generate(4, (index) => _buildDot(index)),
                   ),
 
                   // Action Button
@@ -49,7 +51,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 12),
                     ),
-                    child: Text(_currentPage == 2 ? 'Get Started' : 'Next'),
+                    child: Text(_currentPage == 3 ? 'Get Started' : 'Next'),
                   ),
                 ],
               ),
@@ -75,7 +77,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _onNext() async {
-    if (_currentPage < 2) {
+    if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -153,6 +155,57 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 },
               );
             }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationPage() {
+    return Padding(
+      padding: const EdgeInsets.all(32.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.notifications_active,
+              size: 80, color: Theme.of(context).primaryColor),
+          const SizedBox(height: 32),
+          Text(
+            'Stay Updated',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Get timely alerts for subscription renewals and trial expirations.',
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () async {
+              try {
+                final service =
+                    await ref.read(notificationServiceProvider.future);
+                final granted = await service.requestPermissions();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(granted
+                        ? 'Notifications enabled!'
+                        : 'Notifications denied. You can enable them in settings.'),
+                  ));
+                }
+              } catch (e) {
+                // Ignore or log
+              }
+            },
+            icon: const Icon(Icons.check),
+            label: const Text('Enable Notifications'),
           ),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../subscriptions/domain/subscription.dart';
 import '../../../subscriptions/presentation/providers/subscription_controller.dart';
 import '../../../../core/constants/category_colors.dart';
+import '../../../notifications/providers/notification_provider.dart';
 import '../providers/settings_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -92,6 +93,22 @@ class SettingsScreen extends ConsumerWidget {
               subtitle:
                   const Text('Create 5-20 random subscriptions for testing'),
               onTap: () => _generateTestData(context, ref),
+            ),
+            const Divider(),
+
+            // Notification Permission
+            const NotificationPermissionTile(),
+            const Divider(),
+
+            // Test Notification (Development Helper)
+            ListTile(
+              leading:
+                  const Icon(Icons.notifications_active, color: Colors.orange),
+              title: const Text('Test Notification',
+                  style: TextStyle(
+                      color: Colors.orange, fontWeight: FontWeight.bold)),
+              subtitle: const Text('Trigger an immediate notification'),
+              onTap: () => _triggerTestNotification(context, ref),
             ),
             const Divider(),
 
@@ -330,5 +347,125 @@ class SettingsScreen extends ConsumerWidget {
     // Use spec-compliant colors from CategoryColors
     final color = CategoryColors.getColor(category);
     return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+  }
+
+  void _triggerTestNotification(BuildContext context, WidgetRef ref) async {
+    try {
+      final notificationService =
+          await ref.read(notificationServiceProvider.future);
+
+      await notificationService.showNotification(
+        id: 999999,
+        title: 'Test Notification',
+        body: 'This is a test notification from SubSentry settings.',
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Notification triggered!')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error triggering notification: $e')),
+        );
+      }
+    }
+  }
+}
+
+class NotificationPermissionTile extends ConsumerStatefulWidget {
+  const NotificationPermissionTile({super.key});
+
+  @override
+  ConsumerState<NotificationPermissionTile> createState() =>
+      _NotificationPermissionTileState();
+}
+
+class _NotificationPermissionTileState
+    extends ConsumerState<NotificationPermissionTile>
+    with WidgetsBindingObserver {
+  bool _isEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkPermission();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkPermission();
+    }
+  }
+
+  Future<void> _checkPermission() async {
+    try {
+      final service = await ref.read(notificationServiceProvider.future);
+      final enabled = await service.areNotificationsEnabled();
+      if (mounted) setState(() => _isEnabled = enabled);
+    } catch (e) {
+      // Handle error cleanly
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.notifications),
+      title: const Text('Notifications'),
+      subtitle: Text(_isEnabled ? 'Permitted' : 'Disabled'),
+      trailing: Switch(
+        value: _isEnabled,
+        onChanged: (val) async {
+          final service = await ref.read(notificationServiceProvider.future);
+          if (val && !_isEnabled) {
+            // User wants to enable
+            final granted = await service.requestPermissions();
+            if (!granted) {
+              if (context.mounted) _showOpenSettingsDialog(context, service);
+            }
+            // Check again regardless
+            _checkPermission();
+          } else if (!val && _isEnabled) {
+            // User wants to disable - must go to settings
+            if (context.mounted) _showOpenSettingsDialog(context, service);
+          }
+        },
+      ),
+    );
+  }
+
+  void _showOpenSettingsDialog(BuildContext context, dynamic service) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Manage Permissions'),
+        content: const Text(
+            'To change notification permissions, please visit your device settings.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              service.openSettings();
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
   }
 }

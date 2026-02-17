@@ -50,11 +50,29 @@ class AppTheme {
             borderRadius: BorderRadius.all(Radius.circular(16))),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: primary,
+        backgroundColor: secondary,
         foregroundColor: Colors.white,
-        elevation: 4,
+        elevation: 8,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(16))),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: primary, width: 2),
+        ),
+        // Premium focus state: Bg primaryContainer @ 10%
+        focusColor: primary.withOpacity(0.1),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: background,
@@ -94,11 +112,28 @@ class AppTheme {
             borderRadius: BorderRadius.all(Radius.circular(16))),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: primary,
+        backgroundColor: secondary,
         foregroundColor: Colors.white,
-        elevation: 4,
+        elevation: 8,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(16))),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkSurface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF404040)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF404040)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF4BA3B5), width: 2),
+        ),
+        focusColor: const Color(0xFF4BA3B5).withOpacity(0.1),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: darkBackground,

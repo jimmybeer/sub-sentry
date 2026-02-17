@@ -83,9 +83,9 @@ class _BreakdownChartState extends State<BreakdownChart> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           SizedBox(
-            height: 200,
+            height: 180,
             child: Stack(
               children: [
                 PieChart(
@@ -131,7 +131,7 @@ class _BreakdownChartState extends State<BreakdownChart> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           // Legend
           Wrap(
             spacing: 16,

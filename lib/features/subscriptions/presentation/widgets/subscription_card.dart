@@ -38,72 +38,85 @@ class SubscriptionCard extends StatelessWidget {
     final cycleName = subscription.cycle.name;
     final cycleStr = cycleName[0].toUpperCase() + cycleName.substring(1);
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              // Color Indicator
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: _parseColor(subscription.colorHex).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text(
-                    subscription.name.isNotEmpty
-                        ? subscription.name[0].toUpperCase()
-                        : '?',
-                    style: TextStyle(
-                      color: _parseColor(subscription.colorHex),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F4C5C).withOpacity(0.08),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                // Color Indicator
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: _parseColor(subscription.colorHex).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      subscription.name.isNotEmpty
+                          ? subscription.name[0].toUpperCase()
+                          : '?',
+                      style: TextStyle(
+                        color: _parseColor(subscription.colorHex),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
+                const SizedBox(width: 16),
 
-              // Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      subscription.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Next: ${DateFormat('MMM d').format(nextDate)} • $cycleStr',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-                    _buildStatusIcons(context, nextDate),
-                  ],
+                // Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        subscription.name,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Next: ${DateFormat('MMM d').format(nextDate)} • $cycleStr',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey[600],
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      _buildStatusIcons(context, nextDate),
+                    ],
+                  ),
                 ),
-              ),
 
-              // Cost
-              Text(
-                costStr,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ],
+                // Cost
+                Text(
+                  costStr,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -152,9 +165,10 @@ class SubscriptionCard extends StatelessWidget {
           showDuration: const Duration(seconds: 4),
           triggerMode: TooltipTriggerMode.tap,
           message: msg,
-          child: const Padding(
-            padding: EdgeInsets.only(right: 8),
-            child: Icon(Icons.card_giftcard, color: Colors.green, size: 18),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Icon(Icons.card_giftcard,
+                color: Theme.of(context).colorScheme.secondary, size: 18),
           ),
         ));
       }

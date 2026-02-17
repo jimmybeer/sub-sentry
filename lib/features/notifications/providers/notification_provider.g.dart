@@ -7,11 +7,12 @@ part of 'notification_provider.dart';
 // **************************************************************************
 
 String _$notificationServiceHash() =>
-    r'2e61b11a04467e1d68865bbe5cdb40ecd33d86d7';
+    r'b2819a378be47d504e7da7e0c795e16bc898863a';
 
 /// See also [notificationService].
 @ProviderFor(notificationService)
-final notificationServiceProvider = Provider<NotificationService>.internal(
+final notificationServiceProvider =
+    FutureProvider<NotificationService>.internal(
   notificationService,
   name: r'notificationServiceProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -21,6 +22,6 @@ final notificationServiceProvider = Provider<NotificationService>.internal(
   allTransitiveDependencies: null,
 );
 
-typedef NotificationServiceRef = ProviderRef<NotificationService>;
+typedef NotificationServiceRef = FutureProviderRef<NotificationService>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

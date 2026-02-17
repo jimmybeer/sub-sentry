@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
 import 'package:sub_sentry/core/constants/category_colors.dart';
+import 'package:sub_sentry/core/logic/smart_defaults.dart';
 import 'package:uuid/uuid.dart';
 
 class SubscriptionForm extends StatefulWidget {
@@ -50,7 +52,10 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
     _nameController = TextEditingController(text: data?.name ?? '');
     _costController = TextEditingController(text: data?.cost.toString() ?? '');
 
+    _nameController.addListener(_onNameChanged);
+
     _cycle = data?.cycle ?? BillingCycle.monthly;
+    // ... rest of init ...
     _firstBillDate = data?.firstBillDate ?? DateTime.now();
     _category =
         data?.category ?? widget.initialCategory ?? SubCategory.entertainment;
@@ -74,6 +79,29 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
     _includeInWeeklySummary = data?.includeInWeeklySummary ?? true;
   }
 
+  void _onNameChanged() {
+    // Only auto-populate for NEW subscriptions
+    if (widget.initialData != null) return;
+
+    final name = _nameController.text.trim();
+    if (name.length < 3) return;
+
+    final category = SmartDefaults.getCategory(name);
+    if (category != null && category != _category) {
+      setState(() {
+        _category = category;
+        _color = CategoryColors.getColor(category);
+      });
+    }
+
+    final price = SmartDefaults.getPrice(name);
+    if (price != null && _costController.text.isEmpty) {
+      setState(() {
+        _costController.text = price.toString();
+      });
+    }
+  }
+
   Color _parseColorHex(String hex) {
     try {
       if (hex.startsWith('#')) hex = hex.substring(1);
@@ -94,6 +122,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
   }
 
   void _submit() {
+    HapticFeedback.mediumImpact();
     if (_formKey.currentState!.validate()) {
       if (_isTrial && _trialEndDate == null) {
         if (mounted) {
@@ -399,7 +428,8 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application
-        android:label="sub_sentry"
+        android:label="SubSentry"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

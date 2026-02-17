@@ -1,7 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../logic/subscription_stats_logic.dart';
+import 'package:sub_sentry/core/constants/category_colors.dart';
+import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
+import 'package:sub_sentry/features/analysis/logic/subscription_stats_logic.dart';
 
 class PulseChart extends StatefulWidget {
   final SubscriptionStats stats;
@@ -70,13 +72,32 @@ class _PulseChartState extends State<PulseChart> {
     // 2. Bar Data (Daily)
     final barGroups = List.generate(daysInMonth, (index) {
       final day = index + 1;
-      final value = stats.dailyCashflow[day] ?? 0.0;
+      final categoryCosts = stats.dailyCashflowByCategory[day] ?? {};
+      final totalForDay = stats.dailyCashflow[day] ?? 0.0;
+
+      final stackItems = <BarChartRodStackItem>[];
+      double currentSum = 0;
+
+      final sortedCategories = categoryCosts.keys.toList()
+        ..sort((a, b) => a.index.compareTo(b.index));
+
+      for (final cat in sortedCategories) {
+        final cost = categoryCosts[cat]!;
+        stackItems.add(BarChartRodStackItem(
+          currentSum,
+          currentSum + cost,
+          CategoryColors.getColor(cat),
+        ));
+        currentSum += cost;
+      }
+
       return BarChartGroupData(
         x: day,
         barRods: [
           BarChartRodData(
-            toY: value,
-            color: value > 0
+            toY: totalForDay,
+            rodStackItems: stackItems,
+            color: totalForDay > 0
                 ? (Theme.of(context).brightness == Brightness.dark
                     ? const Color(0xFF4DD0E1)
                     : Theme.of(context).primaryColor)
@@ -184,7 +205,7 @@ class _PulseChartState extends State<PulseChart> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           AspectRatio(
             aspectRatio: 1.70,
             child: Stack(

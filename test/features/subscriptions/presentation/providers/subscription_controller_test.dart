@@ -98,7 +98,7 @@ void main() {
 
     container = ProviderContainer(overrides: [
       subscriptionRepositoryProvider.overrideWithValue(mockRepo),
-      notificationServiceProvider.overrideWithValue(mockNotify),
+      notificationServiceProvider.overrideWith((ref) => mockNotify),
       settingsControllerProvider.overrideWith(() => FakeSettingsController()),
     ]);
   });

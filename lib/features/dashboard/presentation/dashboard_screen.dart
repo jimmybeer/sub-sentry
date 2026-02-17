@@ -40,157 +40,182 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ],
       ),
       body: asyncSubs.hasValue
-          ? Column(
-              children: [
-                // Expired Contracts Alert
-                if (asyncSubs.value != null)
-                  _buildExpiredContractsBanner(context, ref, asyncSubs.value!),
-
-                // Month Selector
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.chevron_left),
-                        onPressed: () {
-                          ref.read(selectedMonthProvider.notifier).state =
-                              DateTime(
-                                  selectedMonth.year, selectedMonth.month - 1);
-                        },
-                      ),
-                      Text(
-                        DateFormat('MMMM yyyy').format(selectedMonth),
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.chevron_right),
-                        onPressed: () {
-                          ref.read(selectedMonthProvider.notifier).state =
-                              DateTime(
-                                  selectedMonth.year, selectedMonth.month + 1);
-                        },
-                      ),
-                    ],
+          ? CustomScrollView(
+              slivers: [
+                // Expired Contracts Alert banner inside a sliver
+                if (asyncSubs.value != null &&
+                    asyncSubs.value!.any((s) =>
+                        s.contractEndDate != null &&
+                        s.contractEndDate!.isBefore(DateTime.now()) &&
+                        s.status == SubStatus.active))
+                  SliverToBoxAdapter(
+                    child: _buildExpiredContractsBanner(
+                        context, ref, asyncSubs.value!),
                   ),
-                ),
 
-                if (asyncSubs.value!.isEmpty)
-                  Expanded(
-                    child: Center(
-                        child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.credit_card_off,
-                            size: 64, color: Colors.grey),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No subscriptions yet.',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: Colors.grey,
+                // Main Top Section (Month Selector, Chart)
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      // Month Selector
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.chevron_left),
+                              onPressed: () {
+                                ref.read(selectedMonthProvider.notifier).state =
+                                    DateTime(selectedMonth.year,
+                                        selectedMonth.month - 1);
+                              },
+                            ),
+                            Text(
+                              DateFormat('MMMM yyyy').format(selectedMonth),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
                                   ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.chevron_right),
+                              onPressed: () {
+                                ref.read(selectedMonthProvider.notifier).state =
+                                    DateTime(selectedMonth.year,
+                                        selectedMonth.month + 1);
+                              },
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () => context.go('/home/add'),
-                          child: const Text('Add First Subscription'),
-                        ),
-                      ],
-                    )),
-                  )
-                else ...[
-                  // Insight Engine
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        // Tabs
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest
-                                .withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
+                      ),
+
+                      if (asyncSubs.value!.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 64.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildTab(context, 'Pulse', 0),
-                              _buildTab(context, 'Breakdown', 1),
+                              const Icon(Icons.credit_card_off,
+                                  size: 64, color: Colors.grey),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No subscriptions yet.',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color: Colors.grey,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: () => context.go('/home/add'),
+                                child: const Text('Add First Subscription'),
+                              ),
+                            ],
+                          ),
+                        )
+                      else ...[
+                        // Insight Engine
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            children: [
+                              // Tabs
+                              Container(
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    _buildTab(context, 'Pulse', 0),
+                                    _buildTab(context, 'Breakdown', 1),
+                                  ],
+                                ),
+                              ),
+
+                              // Chart Area
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                child: _selectedTabIndex == 0
+                                    ? PulseChart(
+                                        key: const ValueKey('Pulse'),
+                                        stats: stats,
+                                        payDays: payDays,
+                                        showWeekends: settingsAsync.valueOrNull
+                                                ?.autoShiftWeekendPayments ??
+                                            false,
+                                      )
+                                    : BreakdownChart(
+                                        key: const ValueKey('Breakdown'),
+                                        stats: stats),
+                              ),
                             ],
                           ),
                         ),
 
-                        // Chart Area
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: _selectedTabIndex == 0
-                              ? PulseChart(
-                                  key: const ValueKey('Pulse'),
-                                  stats: stats,
-                                  payDays: payDays,
-                                  showWeekends: settingsAsync.valueOrNull
-                                          ?.autoShiftWeekendPayments ??
-                                      false,
-                                )
-                              : BreakdownChart(
-                                  key: const ValueKey('Breakdown'),
-                                  stats: stats),
+                        const SizedBox(height: 24),
+
+                        // List Header
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Row(
+                            children: [
+                              Text(
+                                'All Subscriptions',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                'Run Rate: £${stats.totalNormalizedMonthlyCost.toStringAsFixed(2)}/mo',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Colors.grey,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(height: 8),
                       ],
+                    ],
+                  ),
+                ),
+
+                // Subscription List as SliverList
+                if (asyncSubs.value!.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final sub = asyncSubs.value![index];
+                          return SubscriptionCard(
+                            subscription: sub,
+                            onTap: () => context.go('/home/edit/${sub.id}'),
+                          );
+                        },
+                        childCount: asyncSubs.value!.length,
+                      ),
                     ),
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // List Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          'All Subscriptions',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          'Run Rate: £${stats.totalNormalizedMonthlyCost.toStringAsFixed(2)}/mo',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey,
-                                  ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // List
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 80),
-                      itemCount: asyncSubs.value!.length,
-                      itemBuilder: (context, index) {
-                        final sub = asyncSubs.value![index];
-                        return SubscriptionCard(
-                          subscription: sub,
-                          onTap: () => context.go('/home/edit/${sub.id}'),
-                        );
-                      },
-                    ),
-                  ),
-                ],
               ],
             )
           : asyncSubs.when(

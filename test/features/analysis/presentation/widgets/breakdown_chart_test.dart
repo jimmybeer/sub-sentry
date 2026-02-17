@@ -23,6 +23,7 @@ void main() {
         SubCategory.entertainment: 55.0,
         SubCategory.utilities: 35.0,
       },
+      dailyCashflowByCategory: {},
       month: DateTime(2024, 2, 1),
     );
 

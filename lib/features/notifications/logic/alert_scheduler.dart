@@ -15,7 +15,8 @@ class AlertScheduler {
   /// [subs] is the list of all subscriptions.
   /// [weekStart] is the start of the week (usually next Monday 9:00 AM).
   static NotificationPayload calculateWeeklySummary(
-      List<Subscription> subs, DateTime weekStart) {
+      List<Subscription> subs, DateTime weekStart, String currencyCode,
+      {bool autoShiftWeekends = true}) {
     // Define the week range: [weekStart, weekEnd)
     // weekEnd is 7 days after weekStart.
     final weekEnd = weekStart.add(const Duration(days: 7));
@@ -42,6 +43,7 @@ class AlertScheduler {
         overrideDate: sub.nextBillOverride,
         referenceDate: weekStart,
         ignoreWeekendShift: sub.ignoreWeekendShift,
+        autoShiftWeekends: autoShiftWeekends,
       );
 
       // Check if it falls within the week
@@ -56,9 +58,8 @@ class AlertScheduler {
       }
     }
 
-    final currencyCmt =
-        NumberFormat.simpleCurrency(locale: 'en_GB'); // Should be dynamic later
-    final formattedTotal = currencyCmt.format(totalCost);
+    final formattedTotal =
+        NumberFormat.simpleCurrency(name: currencyCode).format(totalCost);
     final count = subNames.length;
     final joinedNames = subNames.join(', ');
 
@@ -96,7 +97,8 @@ class AlertScheduler {
 
   /// Calculates renewal alerts for Yearly/Quarterly subscriptions.
   /// usually 7 days and 1 day before.
-  static List<DateTime> calculateRenewalAlertDates(Subscription sub) {
+  static List<DateTime> calculateRenewalAlertDates(Subscription sub,
+      {bool autoShiftWeekends = true}) {
     // Only for long-term cycles
     if (sub.cycle != BillingCycle.yearly &&
         sub.cycle != BillingCycle.quarterly) {
@@ -111,7 +113,8 @@ class AlertScheduler {
         sub.firstBillDate, sub.cycle,
         overrideDate: sub.nextBillOverride,
         referenceDate: now,
-        ignoreWeekendShift: sub.ignoreWeekendShift);
+        ignoreWeekendShift: sub.ignoreWeekendShift,
+        autoShiftWeekends: autoShiftWeekends);
 
     // Helper to set time to 9 AM
     DateTime set9am(DateTime d) {

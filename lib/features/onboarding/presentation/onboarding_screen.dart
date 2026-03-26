@@ -49,7 +49,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     onPressed: _onNext,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
+                          horizontal: 24, vertical: 14),
                     ),
                     child: Text(_currentPage == 3 ? 'Get Started' : 'Next'),
                   ),
@@ -218,7 +218,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.check_circle, size: 80, color: Colors.green),
+          const Icon(Icons.check_circle, size: 80, color: Colors.green),
           const SizedBox(height: 32),
           Text(
             "You're All Set!",

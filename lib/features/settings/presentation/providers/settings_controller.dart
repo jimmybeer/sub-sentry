@@ -14,6 +14,7 @@ class SettingsState {
   final int weeklySummaryDay; // DateTime.monday = 1
   final String weeklySummaryTime; // "HH:mm"
   final bool trialAlertsEnabled;
+  final bool showTodayIndicator;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -25,6 +26,7 @@ class SettingsState {
     this.weeklySummaryDay = DateTime.monday,
     this.weeklySummaryTime = '09:00',
     this.trialAlertsEnabled = true,
+    this.showTodayIndicator = true,
   });
 
   SettingsState copyWith({
@@ -37,6 +39,7 @@ class SettingsState {
     int? weeklySummaryDay,
     String? weeklySummaryTime,
     bool? trialAlertsEnabled,
+    bool? showTodayIndicator,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -49,6 +52,7 @@ class SettingsState {
       weeklySummaryDay: weeklySummaryDay ?? this.weeklySummaryDay,
       weeklySummaryTime: weeklySummaryTime ?? this.weeklySummaryTime,
       trialAlertsEnabled: trialAlertsEnabled ?? this.trialAlertsEnabled,
+      showTodayIndicator: showTodayIndicator ?? this.showTodayIndicator,
     );
   }
 }
@@ -73,6 +77,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     final summaryDay = _box.get('summary_day', defaultValue: DateTime.monday);
     final summaryTime = _box.get('summary_time', defaultValue: '09:00');
     final trialEnabled = _box.get('trial_enabled', defaultValue: true);
+    final showToday = _box.get('show_today_indicator', defaultValue: true);
 
     return SettingsState(
       themeMode: mode,
@@ -84,6 +89,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       weeklySummaryDay: summaryDay,
       weeklySummaryTime: summaryTime,
       trialAlertsEnabled: trialEnabled,
+      showTodayIndicator: showToday,
     );
   }
 
@@ -143,6 +149,13 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     await _box.put('trial_enabled', value);
     if (state.value != null) {
       state = AsyncData(state.value!.copyWith(trialAlertsEnabled: value));
+    }
+  }
+
+  Future<void> toggleShowTodayIndicator(bool value) async {
+    await _box.put('show_today_indicator', value);
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(showTodayIndicator: value));
     }
   }
 

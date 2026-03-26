@@ -20,14 +20,14 @@ class SubscriptionStats {
     required this.month,
   });
 
-  factory SubscriptionStats.empty() => SubscriptionStats(
+  factory SubscriptionStats.empty(DateTime month) => SubscriptionStats(
         totalNormalizedMonthlyCost: 0,
         projectedCashflowTotal: 0,
         dailyCashflow: {},
         dailyCashflowByCategory: {},
         categoryBreakdown: {},
         actualCategoryBreakdown: {},
-        month: DateTime.now(),
+        month: month,
       );
 }
 
@@ -125,15 +125,18 @@ class SubscriptionStatsLogic {
           case BillingCycle.monthly:
             return BillingCalculator.addMonths(sub.firstBillDate, index,
                 anchorDay: sub.firstBillDate.day,
-                ignoreWeekendShift: sub.ignoreWeekendShift);
+                ignoreWeekendShift: sub.ignoreWeekendShift,
+                autoShiftWeekends: false);
           case BillingCycle.quarterly:
             return BillingCalculator.addMonths(sub.firstBillDate, index * 3,
                 anchorDay: sub.firstBillDate.day,
-                ignoreWeekendShift: sub.ignoreWeekendShift);
+                ignoreWeekendShift: sub.ignoreWeekendShift,
+                autoShiftWeekends: false);
           case BillingCycle.yearly:
             return BillingCalculator.addMonths(sub.firstBillDate, index * 12,
                 anchorDay: sub.firstBillDate.day,
-                ignoreWeekendShift: sub.ignoreWeekendShift);
+                ignoreWeekendShift: sub.ignoreWeekendShift,
+                autoShiftWeekends: false);
         }
       }
 
@@ -141,7 +144,12 @@ class SubscriptionStatsLogic {
       // Actually, we need to catch "late" bills from prev month that fall in this month.
       // So we start checking from our estimated index.
 
+      int _guard = 0;
       while (true) {
+        if (++_guard > 500) {
+          assert(false, 'SubscriptionStatsLogic: loop exceeded 500 iterations');
+          break;
+        }
         candidate = computeCandidate(cycleIndex);
 
         // Optimization: If we are WAY past endOfMonth, break.

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
 import 'package:sub_sentry/core/constants/category_colors.dart';
+import 'package:sub_sentry/features/settings/presentation/providers/settings_controller.dart';
 import 'package:uuid/uuid.dart';
 
-class SubscriptionForm extends StatefulWidget {
+class SubscriptionForm extends ConsumerStatefulWidget {
   final Subscription? initialData;
   final SubCategory? initialCategory;
   final ValueChanged<Subscription> onSave;
@@ -20,10 +22,10 @@ class SubscriptionForm extends StatefulWidget {
   });
 
   @override
-  State<SubscriptionForm> createState() => _SubscriptionFormState();
+  ConsumerState<SubscriptionForm> createState() => _SubscriptionFormState();
 }
 
-class _SubscriptionFormState extends State<SubscriptionForm> {
+class _SubscriptionFormState extends ConsumerState<SubscriptionForm> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _nameController;
@@ -40,6 +42,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
   DateTime? _nextBillOverride;
   late TextEditingController _paymentSourceController;
   late TextEditingController _notesController;
+  final _cancellationUrlController = TextEditingController();
   bool _ignoreWeekendShift = false;
   bool _includeInWeeklySummary = true;
 
@@ -72,6 +75,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
     _paymentSourceController =
         TextEditingController(text: data?.paymentSource ?? '');
     _notesController = TextEditingController(text: data?.notes ?? '');
+    _cancellationUrlController.text = data?.cancellationUrl ?? '';
     _ignoreWeekendShift = data?.ignoreWeekendShift ?? false;
     _includeInWeeklySummary = data?.includeInWeeklySummary ?? true;
   }
@@ -92,6 +96,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
     _costController.dispose();
     _paymentSourceController.dispose();
     _notesController.dispose();
+    _cancellationUrlController.dispose();
     super.dispose();
   }
 
@@ -120,13 +125,15 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
         cycle: _cycle,
         firstBillDate: _firstBillDate,
         category: _category,
-        colorHex: '#${_color.value.toRadixString(16)}',
+        colorHex: '#${_color.toARGB32().toRadixString(16)}',
         status: _status,
         isTrial: _isTrial,
         paymentSource: _paymentSourceController.text.trim().isEmpty
             ? null
             : _paymentSourceController.text.trim(),
-        cancellationUrl: widget.initialData?.cancellationUrl,
+        cancellationUrl: _cancellationUrlController.text.trim().isEmpty
+            ? null
+            : _cancellationUrlController.text.trim(),
         trialEndDate: _trialEndDate,
         contractEndDate: _contractEndDate,
         notes: _notesController.text.trim().isEmpty
@@ -239,11 +246,18 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                 TextFormField(
                   key: const Key('name_input'),
                   controller: _nameController,
+                  maxLength: 100,
                   decoration: const InputDecoration(
                     labelText: 'Subscription Name',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Required';
+                    if (v.trim().length > 100) {
+                      return 'Name is too long (max 100 characters)';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -253,10 +267,15 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                   controller: _costController,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Cost',
-                    prefixText: '£',
-                    border: OutlineInputBorder(),
+                    prefixText: () {
+                      const symbols = {'GBP': '£', 'USD': '\$', 'EUR': '€'};
+                      final code = ref.watch(settingsControllerProvider
+                          .select((s) => s.value?.currencyCode ?? 'GBP'));
+                      return symbols[code] ?? code;
+                    }(),
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Required';
@@ -286,7 +305,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                 // Category
                 DropdownButtonFormField<SubCategory>(
                   key: const Key('category_input'),
-                  value: _category,
+                  initialValue: _category,
                   decoration: const InputDecoration(
                       labelText: 'Category', border: OutlineInputBorder()),
                   items: SubCategory.values.map((c) {
@@ -301,21 +320,6 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                   subtitle: Text(_getPaymentDateDescription()),
                   trailing: const Icon(Icons.calendar_today),
                   onTap: _pickBillDate,
-                ),
-                const Divider(),
-
-                SwitchListTile(
-                  title: const Text('Exact Date Only'),
-                  subtitle: const Text(
-                      'Do not shift payments that fall on weekends or missing month days'),
-                  value: _ignoreWeekendShift,
-                  onChanged: (v) => setState(() => _ignoreWeekendShift = v),
-                ),
-                SwitchListTile(
-                  title: const Text('Include in Weekly Summary'),
-                  subtitle: const Text('Show in "Coming Up" notification'),
-                  value: _includeInWeeklySummary,
-                  onChanged: (v) => setState(() => _includeInWeeklySummary = v),
                 ),
                 const Divider(),
 
@@ -367,6 +371,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                 TextFormField(
                   key: const Key('payment_source_input'),
                   controller: _paymentSourceController,
+                  maxLength: 100,
                   decoration: const InputDecoration(
                     labelText: 'Payment Source',
                     border: OutlineInputBorder(),
@@ -377,7 +382,7 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                 // Status
                 DropdownButtonFormField<SubStatus>(
                   key: const Key('status_input'),
-                  value: _status,
+                  initialValue: _status,
                   decoration: const InputDecoration(
                       labelText: 'Status', border: OutlineInputBorder()),
                   items: SubStatus.values.map((s) {
@@ -388,15 +393,53 @@ class _SubscriptionFormState extends State<SubscriptionForm> {
                 ),
                 const SizedBox(height: 16),
 
+                SwitchListTile(
+                  title: const Text('Exact Date Only'),
+                  subtitle: const Text(
+                      'Do not shift payments that fall on weekends or missing month days'),
+                  value: _ignoreWeekendShift,
+                  onChanged: (v) => setState(() => _ignoreWeekendShift = v),
+                ),
+                SwitchListTile(
+                  title: const Text('Include in Weekly Summary'),
+                  subtitle: const Text('Show in "Coming Up" notification'),
+                  value: _includeInWeeklySummary,
+                  onChanged: (v) => setState(() => _includeInWeeklySummary = v),
+                ),
+                const Divider(),
+
                 // Notes
                 TextFormField(
                   key: const Key('notes_input'),
                   controller: _notesController,
                   maxLines: 3,
+                  maxLength: 500,
                   decoration: const InputDecoration(
                     labelText: 'Notes',
                     border: OutlineInputBorder(),
                   ),
+                ),
+                const SizedBox(height: 16),
+
+                // Cancellation URL
+                TextFormField(
+                  key: const Key('cancellation_url_input'),
+                  controller: _cancellationUrlController,
+                  keyboardType: TextInputType.url,
+                  decoration: const InputDecoration(
+                    labelText: 'Cancellation URL (optional)',
+                    hintText: 'https://...',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return null;
+                    final uri = Uri.tryParse(v.trim());
+                    if (uri == null ||
+                        (uri.scheme != 'http' && uri.scheme != 'https')) {
+                      return 'Must be a valid http:// or https:// URL';
+                    }
+                    return null;
+                  },
                 ),
               ],
             ),

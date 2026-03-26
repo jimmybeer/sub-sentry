@@ -51,6 +51,8 @@ class FakeSettingsController extends AsyncNotifier<SettingsState>
 
   @override
   Future<void> toggleTrialAlerts(bool value) async {}
+  @override
+  Future<void> toggleShowTodayIndicator(bool value) async {}
 }
 
 void main() {

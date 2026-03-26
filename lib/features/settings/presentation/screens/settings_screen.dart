@@ -1,10 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sub_sentry/shared/error_handling/error_handler.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../subscriptions/domain/subscription.dart';
-import '../../../subscriptions/presentation/providers/subscription_controller.dart';
-import '../../../../core/constants/category_colors.dart';
-import '../../../notifications/providers/notification_provider.dart';
-import '../providers/settings_controller.dart';
+import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
+import 'package:sub_sentry/features/subscriptions/presentation/providers/subscription_controller.dart';
+import 'package:sub_sentry/core/constants/category_colors.dart';
+import 'package:sub_sentry/features/notifications/providers/notification_provider.dart';
+import 'package:sub_sentry/features/settings/presentation/providers/settings_controller.dart';
+import 'package:sub_sentry/features/settings/presentation/providers/data_transfer_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -17,7 +22,10 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Settings')),
       body: asyncSettings.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) {
+          ErrorHandler.log(e, st);
+          return const Center(child: Text('Settings could not be loaded.'));
+        },
         data: (settings) => ListView(
           children: [
             // Theme Mode
@@ -69,46 +77,154 @@ class SettingsScreen extends ConsumerWidget {
             const Divider(),
 
             // Auto Shift Weekend Payments
-            ListTile(
-              leading: const Icon(Icons.calendar_view_week),
+            SwitchListTile(
+              secondary: const Icon(Icons.today),
+              title: const Text('Show Today on Pulse Chart'),
+              subtitle:
+                  const Text('Add a visual indicator for the current day'),
+              value: settings.showTodayIndicator,
+              onChanged: (val) {
+                ref
+                    .read(settingsControllerProvider.notifier)
+                    .toggleShowTodayIndicator(val);
+              },
+            ),
+            const Divider(),
+            SwitchListTile(
+              secondary: const Icon(Icons.calendar_view_week),
               title: const Text('Auto-Shift Weekend Payments'),
               subtitle: const Text('Move Sat/Sun payments to Monday'),
-              trailing: Switch(
-                value: settings.autoShiftWeekendPayments,
-                onChanged: (val) {
-                  ref
-                      .read(settingsControllerProvider.notifier)
-                      .toggleAutoShiftWeekendPayments(val);
-                },
+              value: settings.autoShiftWeekendPayments,
+              onChanged: (val) {
+                ref
+                    .read(settingsControllerProvider.notifier)
+                    .toggleAutoShiftWeekendPayments(val);
+              },
+            ),
+            const Divider(),
+
+            // Notifications Header
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text('Notifications',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.grey)),
+            ),
+
+            // Weekly Summary
+            SwitchListTile(
+              title: const Text('Weekly Summary'),
+              subtitle: const Text('Get a summary of upcoming bills'),
+              value: settings.weeklySummaryEnabled,
+              onChanged: (val) {
+                ref
+                    .read(settingsControllerProvider.notifier)
+                    .toggleWeeklySummary(val);
+              },
+            ),
+            if (settings.weeklySummaryEnabled) ...[
+              ListTile(
+                title: const Text('Day of Week'),
+                trailing: DropdownButton<int>(
+                  value: settings.weeklySummaryDay,
+                  underline: const SizedBox(),
+                  items: List.generate(7, (index) {
+                    final day = index + 1;
+                    return DropdownMenuItem(
+                        value: day, child: Text(_getDayName(day)));
+                  }),
+                  onChanged: (val) {
+                    if (val != null) {
+                      ref
+                          .read(settingsControllerProvider.notifier)
+                          .setWeeklySummaryTime(
+                              val, settings.weeklySummaryTime);
+                    }
+                  },
+                ),
               ),
+              ListTile(
+                title: const Text('Time'),
+                subtitle: Text(settings.weeklySummaryTime),
+                trailing: const Icon(Icons.access_time),
+                onTap: () => _pickTime(context, ref, settings.weeklySummaryDay,
+                    settings.weeklySummaryTime),
+              ),
+            ],
+
+            // Trial Alerts
+            SwitchListTile(
+              title: const Text('Trial Alerts'),
+              subtitle:
+                  const Text('Get notified before trials end (5d, 3d, 1d)'),
+              value: settings.trialAlertsEnabled,
+              onChanged: (val) {
+                ref
+                    .read(settingsControllerProvider.notifier)
+                    .toggleTrialAlerts(val);
+              },
             ),
             const Divider(),
 
             // Generate Test Data (Development Helper)
-            ListTile(
-              leading: const Icon(Icons.science, color: Colors.blue),
-              title: const Text('Generate Test Data',
-                  style: TextStyle(
-                      color: Colors.blue, fontWeight: FontWeight.bold)),
-              subtitle:
-                  const Text('Create 5-20 random subscriptions for testing'),
-              onTap: () => _generateTestData(context, ref),
-            ),
-            const Divider(),
+            if (kDebugMode) ...[
+              ListTile(
+                leading: const Icon(Icons.science, color: Colors.blue),
+                title: const Text('Generate Test Data',
+                    style: TextStyle(
+                        color: Colors.blue, fontWeight: FontWeight.bold)),
+                subtitle:
+                    const Text('Create 5-20 random subscriptions for testing'),
+                onTap: () => _generateTestData(context, ref),
+              ),
+              const Divider(),
+            ],
 
             // Notification Permission
             const NotificationPermissionTile(),
             const Divider(),
 
             // Test Notification (Development Helper)
-            ListTile(
-              leading:
-                  const Icon(Icons.notifications_active, color: Colors.orange),
-              title: const Text('Test Notification',
+            if (kDebugMode) ...[
+              ListTile(
+                leading: const Icon(Icons.notifications_active,
+                    color: Colors.orange),
+                title: const Text('Test Notification',
+                    style: TextStyle(
+                        color: Colors.orange, fontWeight: FontWeight.bold)),
+                subtitle: const Text('Trigger an immediate notification'),
+                onTap: () => _triggerTestNotification(context, ref),
+              ),
+              const Divider(),
+            ],
+
+            // Export / Import Header
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text('Data Management',
                   style: TextStyle(
-                      color: Colors.orange, fontWeight: FontWeight.bold)),
-              subtitle: const Text('Trigger an immediate notification'),
-              onTap: () => _triggerTestNotification(context, ref),
+                      fontWeight: FontWeight.bold, color: Colors.grey)),
+            ),
+
+            // Export Data
+            ListTile(
+              leading: const Icon(Icons.download, color: Colors.green),
+              title: const Text('Export Data',
+                  style: TextStyle(
+                      color: Colors.green, fontWeight: FontWeight.bold)),
+              subtitle: const Text('Save your subscriptions to a CSV file'),
+              onTap: () => _exportData(context, ref),
+            ),
+            const Divider(),
+
+            // Import Data
+            ListTile(
+              leading: const Icon(Icons.upload, color: Colors.blue),
+              title: const Text('Import Data',
+                  style: TextStyle(
+                      color: Colors.blue, fontWeight: FontWeight.bold)),
+              subtitle: const Text('Restore subscriptions from a CSV file'),
+              onTap: () => _importData(context, ref),
             ),
             const Divider(),
 
@@ -121,10 +237,75 @@ class SettingsScreen extends ConsumerWidget {
               subtitle: const Text('Delete all subscriptions and reset app'),
               onTap: () => _confirmWipe(context, ref),
             ),
+            const Divider(),
+
+            // About
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text('About',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.grey)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: const Text('Privacy Policy'),
+              trailing: const Icon(Icons.open_in_new, size: 16),
+              onTap: () => launchUrl(
+                Uri.parse('https://jyappsupport.github.io/subsentry/'),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('Version'),
+              subtitle: FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snap) => Text(
+                  snap.hasData
+                      ? '${snap.data!.version} (${snap.data!.buildNumber})'
+                      : '...',
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void _exportData(BuildContext context, WidgetRef ref) async {
+    try {
+      final path = await ref.read(dataTransferControllerProvider).exportData();
+      if (path != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Data exported to $path')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
+      }
+    }
+  }
+
+  void _importData(BuildContext context, WidgetRef ref) async {
+    try {
+      final count = await ref.read(dataTransferControllerProvider).importData();
+      if (count > 0 && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Successfully imported $count subscriptions!')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Import failed: $e')),
+        );
+      }
+    }
   }
 
   String _themeModeName(ThemeMode mode) {
@@ -346,7 +527,7 @@ class SettingsScreen extends ConsumerWidget {
   String _getCategoryColorHex(SubCategory category) {
     // Use spec-compliant colors from CategoryColors
     final color = CategoryColors.getColor(category);
-    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+    return '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
   }
 
   void _triggerTestNotification(BuildContext context, WidgetRef ref) async {
@@ -371,6 +552,48 @@ class SettingsScreen extends ConsumerWidget {
           SnackBar(content: Text('Error triggering notification: $e')),
         );
       }
+    }
+  }
+
+  String _getDayName(int day) {
+    // 1 = Mon, 7 = Sun
+    switch (day) {
+      case DateTime.monday:
+        return 'Monday';
+      case DateTime.tuesday:
+        return 'Tuesday';
+      case DateTime.wednesday:
+        return 'Wednesday';
+      case DateTime.thursday:
+        return 'Thursday';
+      case DateTime.friday:
+        return 'Friday';
+      case DateTime.saturday:
+        return 'Saturday';
+      case DateTime.sunday:
+        return 'Sunday';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  Future<void> _pickTime(BuildContext context, WidgetRef ref, int currentDay,
+      String currentTimeStr) async {
+    final parts = currentTimeStr.split(':');
+    final hour = int.tryParse(parts[0]) ?? 9;
+    final minute = int.tryParse(parts[1]) ?? 0;
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: hour, minute: minute),
+    );
+
+    if (picked != null) {
+      final newTime =
+          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      ref
+          .read(settingsControllerProvider.notifier)
+          .setWeeklySummaryTime(currentDay, newTime);
     }
   }
 }

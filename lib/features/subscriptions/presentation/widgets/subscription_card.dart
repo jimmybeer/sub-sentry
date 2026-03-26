@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/logic/billing_calculator.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../settings/presentation/providers/settings_controller.dart';
 import '../../domain/subscription.dart';
 
-class SubscriptionCard extends StatelessWidget {
+class SubscriptionCard extends ConsumerWidget {
   final Subscription subscription;
   final VoidCallback? onTap;
 
@@ -25,14 +28,19 @@ class SubscriptionCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currencyCode = ref.watch(
+        settingsControllerProvider.select((s) => s.value?.currencyCode ?? 'GBP'));
+    final autoShiftWeekends = ref.watch(settingsControllerProvider
+        .select((s) => s.value?.autoShiftWeekendPayments ?? true));
+
     final nextDate = BillingCalculator.calculateNextBillDate(
         subscription.firstBillDate, subscription.cycle,
         overrideDate: subscription.nextBillOverride,
-        ignoreWeekendShift: subscription.ignoreWeekendShift);
+        ignoreWeekendShift: subscription.ignoreWeekendShift,
+        autoShiftWeekends: autoShiftWeekends);
 
-    final costStr =
-        NumberFormat.simpleCurrency(locale: 'en_GB').format(subscription.cost);
+    final costStr = formatCurrency(subscription.cost, currencyCode);
 
     // Capitalize only first letter
     final cycleName = subscription.cycle.name;
@@ -45,7 +53,7 @@ class SubscriptionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F4C5C).withOpacity(0.08),
+            color: const Color(0xFF0F4C5C).withValues(alpha: 0.08),
             offset: const Offset(0, 4),
             blurRadius: 12,
           ),
@@ -65,7 +73,8 @@ class SubscriptionCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: _parseColor(subscription.colorHex).withOpacity(0.2),
+                    color: _parseColor(subscription.colorHex)
+                        .withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(

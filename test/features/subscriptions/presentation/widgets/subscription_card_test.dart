@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sub_sentry/features/settings/presentation/providers/settings_controller.dart';
 import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
 import 'package:sub_sentry/features/subscriptions/presentation/widgets/subscription_card.dart';
+
+class _FakeSettingsController extends SettingsController {
+  @override
+  Future<SettingsState> build() async => const SettingsState();
+}
 
 void main() {
   testWidgets('SubscriptionCard displays subscription details', (tester) async {
@@ -24,9 +31,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SubscriptionCard(subscription: sub),
+      ProviderScope(
+        overrides: [
+          settingsControllerProvider
+              .overrideWith(() => _FakeSettingsController()),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: SubscriptionCard(subscription: sub),
+          ),
         ),
       ),
     );

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/subscription.dart';
 import '../../domain/repository/subscription_repository.dart';
@@ -20,6 +23,7 @@ class SubscriptionController extends _$SubscriptionController {
   Future<List<Subscription>> build() async {
     final repo = ref.watch(subscriptionRepositoryProvider);
     final subs = await repo.getAllSubscriptions();
+    final settings = await ref.watch(settingsControllerProvider.future);
 
     final now = DateTime.now();
     // Create mutuable list to sort
@@ -30,28 +34,30 @@ class SubscriptionController extends _$SubscriptionController {
           a.firstBillDate, a.cycle,
           overrideDate: a.nextBillOverride,
           referenceDate: now,
-          ignoreWeekendShift: a.ignoreWeekendShift);
+          ignoreWeekendShift: a.ignoreWeekendShift,
+          autoShiftWeekends: settings.autoShiftWeekendPayments);
       final dateB = BillingCalculator.calculateNextBillDate(
           b.firstBillDate, b.cycle,
           overrideDate: b.nextBillOverride,
           referenceDate: now,
-          ignoreWeekendShift: b.ignoreWeekendShift);
+          ignoreWeekendShift: b.ignoreWeekendShift,
+          autoShiftWeekends: settings.autoShiftWeekendPayments);
       return dateA.compareTo(dateB);
     });
-    // Side Effect: Schedule Alerts
+    return sortedSubs;
+  }
+
+  Future<void> _refreshNotifications() async {
+    if (!state.hasValue) return;
     try {
-      final AsyncValue<NotificationService> notifyAsync =
-          ref.watch(notificationServiceProvider);
-      final settings = ref.watch(settingsControllerProvider).value;
+      final notifyAsync = ref.read(notificationServiceProvider);
+      final settings = ref.read(settingsControllerProvider).value;
       if (notifyAsync.hasValue && settings != null) {
-        await _scheduleAlerts(notifyAsync.value!, sortedSubs, settings);
+        await _scheduleAlerts(notifyAsync.value!, state.value!, settings);
       }
     } catch (e) {
-      // Don't fail the build if notifications fail, simple log
-      print('Notification scheduling failed: $e');
+      debugPrint('Notification refresh failed: $e');
     }
-
-    return sortedSubs;
   }
 
   Future<void> _scheduleAlerts(NotificationService notify,
@@ -67,7 +73,9 @@ class SubscriptionController extends _$SubscriptionController {
 
       final nextInstance =
           _nextInstanceOfDay(settings.weeklySummaryDay, hour, minute);
-      final summary = AlertScheduler.calculateWeeklySummary(subs, nextInstance);
+      final summary = AlertScheduler.calculateWeeklySummary(
+          subs, nextInstance, settings.currencyCode,
+          autoShiftWeekends: settings.autoShiftWeekendPayments);
 
       if (summary.body.isNotEmpty) {
         await notify.scheduleTrialAlert(
@@ -87,7 +95,7 @@ class SubscriptionController extends _$SubscriptionController {
           for (int i = 0; i < dates.length; i++) {
             final date = dates[i];
             if (date.isAfter(DateTime.now())) {
-              final id = sub.id.hashCode + (i + 1);
+              final id = _baseNotificationId(sub.id) + (i + 1);
 
               String body = 'Your trial for ${sub.name} ends ';
               if (i == 0) body += 'in 5 days.';
@@ -111,12 +119,13 @@ class SubscriptionController extends _$SubscriptionController {
     // New logic to catch annual subscriptions
     for (var sub in subs) {
       if (sub.status == SubStatus.active) {
-        final dates = AlertScheduler.calculateRenewalAlertDates(sub);
+        final dates = AlertScheduler.calculateRenewalAlertDates(sub,
+            autoShiftWeekends: settings.autoShiftWeekendPayments);
         for (int i = 0; i < dates.length; i++) {
           final date = dates[i];
           if (date.isAfter(DateTime.now())) {
             // Unique ID offset different from trial/contract
-            final id = sub.id.hashCode + 2000 + i;
+            final id = _baseNotificationId(sub.id) + 2000 + i;
 
             String body = 'Your ${sub.name} subscription renews ';
             if (i == 0) body += 'in 1 week.';
@@ -139,7 +148,7 @@ class SubscriptionController extends _$SubscriptionController {
         final alertDate =
             sub.contractEndDate!.subtract(const Duration(days: 30));
         if (alertDate.isAfter(DateTime.now())) {
-          final id = sub.id.hashCode + 999; // Offset for contract
+          final id = _baseNotificationId(sub.id) + 999; // Offset for contract
           await notify.scheduleTrialAlert(
             id: id,
             title: 'Contract Ending Soon',
@@ -150,6 +159,14 @@ class SubscriptionController extends _$SubscriptionController {
         }
       }
     }
+  }
+
+  /// Derives a stable 28-bit notification base ID from a UUID subscription ID.
+  /// Uses the last 7 hex digits so IDs fit within Android's int32 range.
+  int _baseNotificationId(String subscriptionId) {
+    final clean = subscriptionId.replaceAll('-', '');
+    if (clean.length < 7) return subscriptionId.hashCode.abs() & 0x0FFFFFFF;
+    return int.parse(clean.substring(clean.length - 7), radix: 16);
   }
 
   DateTime _nextInstanceOfDay(int day, int hour, int minute) {
@@ -166,6 +183,7 @@ class SubscriptionController extends _$SubscriptionController {
       final repo = ref.read(subscriptionRepositoryProvider);
       await repo.saveSubscription(sub);
       ref.invalidateSelf();
+      unawaited(_refreshNotifications());
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -176,6 +194,18 @@ class SubscriptionController extends _$SubscriptionController {
       final repo = ref.read(subscriptionRepositoryProvider);
       await repo.deleteSubscription(id);
       ref.invalidateSelf();
+      unawaited(_refreshNotifications());
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> importSubscriptions(List<Subscription> subs) async {
+    try {
+      final repo = ref.read(subscriptionRepositoryProvider);
+      await repo.batchSaveSubscriptions(subs);
+      ref.invalidateSelf();
+      unawaited(_refreshNotifications());
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }

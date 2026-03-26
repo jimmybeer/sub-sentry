@@ -1,8 +1,15 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sub_sentry/features/analysis/logic/subscription_stats_logic.dart';
 import 'package:sub_sentry/features/analysis/presentation/widgets/pulse_chart.dart';
+import 'package:sub_sentry/features/settings/presentation/providers/settings_controller.dart';
+
+class _FakeSettingsController extends SettingsController {
+  @override
+  Future<SettingsState> build() async => const SettingsState();
+}
 
 void main() {
   testWidgets('PulseChart renders bar chart and line overlay', (tester) async {
@@ -23,9 +30,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: PulseChart(stats: stats),
+      ProviderScope(
+        overrides: [
+          settingsControllerProvider
+              .overrideWith(() => _FakeSettingsController()),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: PulseChart(stats: stats),
+          ),
         ),
       ),
     );

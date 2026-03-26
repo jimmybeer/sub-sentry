@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sub_sentry/shared/error_handling/error_handler.dart';
 
 import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
 import 'package:sub_sentry/features/subscriptions/presentation/providers/subscription_controller.dart';
@@ -71,7 +72,10 @@ class EditSubscriptionScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) {
+          ErrorHandler.log(e, st);
+          return const Center(child: Text('Could not load subscription.'));
+        },
       ),
     );
   }

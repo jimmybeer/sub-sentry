@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Colors
@@ -36,8 +35,6 @@ class AppTheme {
         onSecondaryContainer: secondary,
         error: error,
         onError: Colors.white,
-        background: background,
-        onBackground: textPrimary,
         surface: surface,
         onSurface: textPrimary,
       ),
@@ -72,7 +69,7 @@ class AppTheme {
           borderSide: const BorderSide(color: primary, width: 2),
         ),
         // Premium focus state: Bg primaryContainer @ 10%
-        focusColor: primary.withOpacity(0.1),
+        focusColor: primary.withValues(alpha: 0.1),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: background,
@@ -98,8 +95,6 @@ class AppTheme {
         onSecondaryContainer: Color(0xFFD7CCC8),
         error: Color(0xFFCF6679),
         onError: Colors.black,
-        background: Color(0xFF121212),
-        onBackground: darkTextPrimary,
         surface: Color(0xFF1E1E1E),
         onSurface: darkTextPrimary,
       ),
@@ -133,7 +128,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFF4BA3B5), width: 2),
         ),
-        focusColor: const Color(0xFF4BA3B5).withOpacity(0.1),
+        focusColor: const Color(0xFF4BA3B5).withValues(alpha: 0.1),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: darkBackground,
@@ -146,34 +141,40 @@ class AppTheme {
 
   static TextTheme _textTheme(Color primaryColor, Color secondaryColor) {
     return TextTheme(
-      displayLarge: GoogleFonts.outfit(
+      displayLarge: TextStyle(
+        fontFamily: 'Outfit',
         fontSize: 32,
         fontWeight: FontWeight.bold,
         color: primaryColor,
         letterSpacing: -1.0,
       ),
-      headlineMedium: GoogleFonts.outfit(
+      headlineMedium: TextStyle(
+        fontFamily: 'Outfit',
         fontSize: 24,
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: -0.5,
       ),
-      titleMedium: GoogleFonts.outfit(
+      titleMedium: TextStyle(
+        fontFamily: 'Outfit',
         fontSize: 18,
         fontWeight: FontWeight.w500,
         color: primaryColor,
       ),
-      bodyLarge: GoogleFonts.inter(
+      bodyLarge: TextStyle(
+        fontFamily: 'Inter',
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: primaryColor,
       ),
-      bodyMedium: GoogleFonts.inter(
+      bodyMedium: TextStyle(
+        fontFamily: 'Inter',
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: primaryColor,
       ),
-      labelSmall: GoogleFonts.inter(
+      labelSmall: TextStyle(
+        fontFamily: 'Inter',
         fontSize: 11,
         fontWeight: FontWeight.bold,
         color: secondaryColor,

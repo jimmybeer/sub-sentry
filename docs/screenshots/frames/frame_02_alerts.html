@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SubSentry — Frame 02: Alerts / Solution</title>
+  <!--
+    EXPORT: Chrome DevTools → 430×932, DPR=3 → Capture full size screenshot = 1290×2796px
+    SCREENSHOT: Upcoming renewals view, or alert timing settings screen.
+    Show 2–3 upcoming bills with dates clearly readable.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 0;
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .frame {
+      width: 430px;
+      height: 932px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* Same deep teal — consistent brand across frames 1, 2, 4 */
+      background: linear-gradient(168deg, #0E4057 0%, #072535 45%, #040F14 100%);
+      flex-shrink: 0;
+    }
+
+    /* Glow shifted slightly left — subtle compositional variety */
+    .frame::before {
+      content: '';
+      position: absolute;
+      left: 45%;
+      transform: translateX(-50%);
+      top: -20px;
+      width: 300px;
+      height: 480px;
+      background: radial-gradient(ellipse 140px 240px at center, rgba(15, 76, 92, 0.32) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .frame::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 180px;
+      background: linear-gradient(to top, rgba(4, 15, 20, 0.65) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .caption {
+      width: 100%;
+      padding: 44px 36px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .wordmark {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.35);
+      margin-bottom: 22px;
+    }
+
+    .headline {
+      font-family: 'Outfit', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.08;
+      color: #FFFFFF;
+      text-align: center;
+      letter-spacing: -1.2px;
+    }
+
+    .headline .accent { color: #E36414; }
+
+    .sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.58);
+      text-align: center;
+      line-height: 1.55;
+      margin-top: 14px;
+      max-width: 270px;
+    }
+
+    .phone-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+
+    .phone {
+      width: 258px;
+      height: 558px;
+      border-radius: 48px;
+      padding: 11px;
+      position: relative;
+      background: linear-gradient(145deg, #1C1C2E 0%, #0E0E1A 100%);
+      box-shadow:
+        0 0 0 1.5px rgba(255, 255, 255, 0.16),
+        0 0 0 2.5px rgba(255, 255, 255, 0.04),
+        0 28px 72px rgba(0, 0, 0, 0.65),
+        0 0 80px rgba(15, 76, 92, 0.18);
+    }
+
+    .phone::before {
+      content: '';
+      position: absolute;
+      top: 19px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 76px;
+      height: 24px;
+      background: #08080F;
+      border-radius: 20px;
+      z-index: 3;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 39px;
+      overflow: hidden;
+      background: #F5F5F5;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* PLACE YOUR SCREENSHOT: uncomment and set src */
+    /* <img src="../screen_02_alerts.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;"> */
+
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .placeholder-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(15, 76, 92, 0.12);
+      border: 1.5px dashed rgba(15, 76, 92, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: rgba(15, 76, 92, 0.5);
+    }
+
+    .placeholder-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.45);
+    }
+
+    .placeholder-hint {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: rgba(0, 0, 0, 0.30);
+      line-height: 1.5;
+    }
+
+    .badges {
+      width: 100%;
+      padding: 16px 32px 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .badge {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.35);
+      letter-spacing: 0.4px;
+    }
+
+    .badge-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(227, 100, 20, 0.45);
+      flex-shrink: 0;
+    }
+
+    .frame-num {
+      position: absolute;
+      bottom: 28px;
+      right: 28px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.15);
+      letter-spacing: 1px;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    FRAME 02 — SOLUTION / ALERTS
+    Story beat: Deliver relief. "You won't be caught out."
+    Background: Deep midnight teal (consistent with frames 1, 4)
+    Caption: above phone
+  -->
+  <div class="frame">
+
+    <header class="caption">
+      <div class="wordmark">SubSentry</div>
+      <h1 class="headline">
+        Know before<br>
+        <span class="accent">it hits.</span>
+      </h1>
+      <p class="sub">Renewal alerts fire days before you're charged — not after.</p>
+    </header>
+
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <!-- PLACE YOUR SCREENSHOT: uncomment the img tag below -->
+          <!-- <img src="../screen_02_alerts.png" alt="SubSentry upcoming renewals" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;"> -->
+
+          <div class="placeholder">
+            <div class="placeholder-num">02</div>
+            <div class="placeholder-title">Upcoming Renewals</div>
+            <div class="placeholder-hint">
+              2–3 upcoming bills visible.<br>
+              Dates clearly readable.<br>
+              Alert indicator shown.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="badges">
+      <span class="badge">Set Days in Advance</span>
+      <div class="badge-dot"></div>
+      <span class="badge">Never Surprised Again</span>
+    </footer>
+
+    <div class="frame-num">02 / 05</div>
+
+  </div>
+
+</body>
+</html>

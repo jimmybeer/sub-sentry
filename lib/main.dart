@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -17,67 +22,102 @@ import 'l10n/generated/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await SentryFlutter.init(
-    (options) {
-      options.dsn =
-          'https://38f4aebc60bdbbbe0321d756476987ba@o4510866595053568.ingest.de.sentry.io/4510894655537232';
-      options.tracesSampleRate = 1.0;
-    },
-    appRunner: () async {
-      try {
-        await Hive.initFlutter();
-        Hive.registerAdapter(SubscriptionModelAdapter());
+  // The DSN must be supplied at build time via:
+  //   --dart-define=SENTRY_DSN=<value>
+  // Never hardcode this value in source control.
+  const sentryDsn = String.fromEnvironment('SENTRY_DSN');
 
-        final box = await Hive.openBox<SubscriptionModel>('subscriptions');
-        final repository = HiveSubscriptionRepository(box);
+  if (sentryDsn.isNotEmpty) {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = sentryDsn;
+        options.tracesSampleRate = kReleaseMode ? 0.1 : 1.0;
+      },
+      appRunner: _runApp,
+    );
+  } else {
+    await _runApp();
+  }
+}
 
-        runApp(SentryWidget(
-          child: ProviderScope(
-            overrides: [
-              subscriptionRepositoryProvider.overrideWithValue(repository),
-            ],
-            child: const SubSentryApp(),
-          ),
-        ));
-      } catch (e, stack) {
-        ErrorHandler.log(e, stack);
+/// Retrieves the Hive encryption key from secure storage, creating and
+/// persisting a new 32-byte random key if one does not already exist.
+Future<HiveAesCipher> _hiveEncryptionCipher() async {
+  const storage = FlutterSecureStorage();
+  String? encoded = await storage.read(key: 'hive_key');
+  if (encoded == null) {
+    final rng = Random.secure();
+    final keyBytes = Uint8List.fromList(
+      List<int>.generate(32, (_) => rng.nextInt(256)),
+    );
+    encoded = base64UrlEncode(keyBytes);
+    await storage.write(key: 'hive_key', value: encoded);
+  }
+  final keyBytes = base64Url.decode(encoded);
+  return HiveAesCipher(keyBytes);
+}
 
-        // Attempt Recovery: Delete corrupted box and retry
-        try {
-          await Hive.deleteBoxFromDisk('subscriptions');
-          final box = await Hive.openBox<SubscriptionModel>('subscriptions');
-          final repository = HiveSubscriptionRepository(box);
+Future<void> _runApp() async {
+  try {
+    await Hive.initFlutter();
+    Hive.registerAdapter(SubscriptionModelAdapter());
 
-          runApp(SentryWidget(
-            child: ProviderScope(
-              overrides: [
-                subscriptionRepositoryProvider.overrideWithValue(repository),
-              ],
-              child: const SubSentryApp(),
-            ),
-          ));
-        } catch (e2, stack2) {
-          ErrorHandler.log(e2, stack2);
-          runApp(SentryWidget(
-            child: MaterialApp(
-              home: Scaffold(
-                body: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Fatal Error: Failed to initialize app even after recovery.\n$e\n\nRecovery Error:\n$e2',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
+    final cipher = await _hiveEncryptionCipher();
+    final box = await Hive.openBox<SubscriptionModel>(
+      'subscriptions',
+      encryptionCipher: cipher,
+    );
+    final repository = HiveSubscriptionRepository(box);
+
+    runApp(SentryWidget(
+      child: ProviderScope(
+        overrides: [
+          subscriptionRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const SubSentryApp(),
+      ),
+    ));
+  } catch (e, stack) {
+    ErrorHandler.log(e, stack);
+
+    // Attempt Recovery: Delete corrupted box and retry
+    try {
+      await Hive.deleteBoxFromDisk('subscriptions');
+      final cipher = await _hiveEncryptionCipher();
+      final box = await Hive.openBox<SubscriptionModel>(
+        'subscriptions',
+        encryptionCipher: cipher,
+      );
+      final repository = HiveSubscriptionRepository(box);
+
+      runApp(SentryWidget(
+        child: ProviderScope(
+          overrides: [
+            subscriptionRepositoryProvider.overrideWithValue(repository),
+          ],
+          child: const SubSentryApp(),
+        ),
+      ));
+    } catch (e2, stack2) {
+      ErrorHandler.log(e2, stack2);
+      runApp(SentryWidget(
+        child: const MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Something went wrong and the app could not start. Please reinstall the app.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red),
                 ),
               ),
             ),
-          ));
-        }
-      }
-    },
-  );
+          ),
+        ),
+      ));
+    }
+  }
 }
 
 class SubSentryApp extends ConsumerWidget {
@@ -95,8 +135,8 @@ class SubSentryApp extends ConsumerWidget {
       ),
       error: (e, st) {
         ErrorHandler.log(e, st);
-        return MaterialApp(
-          home: Scaffold(body: Center(child: Text('Initialization Error: $e'))),
+        return const MaterialApp(
+          home: Scaffold(body: Center(child: Text('The app failed to load. Please restart.'))),
           debugShowCheckedModeBanner: false,
         );
       },

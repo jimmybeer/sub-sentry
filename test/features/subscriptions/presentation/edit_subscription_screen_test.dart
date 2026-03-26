@@ -43,11 +43,13 @@ class FakeSettingsController extends AsyncNotifier<SettingsState>
   Future<void> setWeeklySummaryTime(int day, String time) async {}
   @override
   Future<void> toggleTrialAlerts(bool value) async {}
+  @override
+  Future<void> toggleShowTodayIndicator(bool value) async {}
 }
 
 // Mock Class Definition
 class MockSubscriptionRepository implements SubscriptionRepository {
-  List<Subscription> _data = [];
+  final List<Subscription> _data = [];
 
   @override
   Future<List<Subscription>> getAllSubscriptions() async => _data;
@@ -59,6 +61,13 @@ class MockSubscriptionRepository implements SubscriptionRepository {
       _data[existingIndex] = sub;
     } else {
       _data.add(sub);
+    }
+  }
+
+  @override
+  Future<void> batchSaveSubscriptions(List<Subscription> subs) async {
+    for (final sub in subs) {
+      await saveSubscription(sub);
     }
   }
 

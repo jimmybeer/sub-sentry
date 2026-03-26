@@ -7,6 +7,7 @@ class BillingCalculator {
     DateTime? overrideDate,
     DateTime? referenceDate,
     bool ignoreWeekendShift = false,
+    bool autoShiftWeekends = true,
   }) {
     final now = referenceDate ?? DateTime.now();
 
@@ -44,17 +45,20 @@ class BillingCalculator {
         case BillingCycle.monthly:
           candidate = addMonths(candidate, 1,
               anchorDay: firstBillDate.day,
-              ignoreWeekendShift: ignoreWeekendShift);
+              ignoreWeekendShift: ignoreWeekendShift,
+              autoShiftWeekends: autoShiftWeekends);
           break;
         case BillingCycle.quarterly:
           candidate = addMonths(candidate, 3,
               anchorDay: firstBillDate.day,
-              ignoreWeekendShift: ignoreWeekendShift);
+              ignoreWeekendShift: ignoreWeekendShift,
+              autoShiftWeekends: autoShiftWeekends);
           break;
         case BillingCycle.yearly:
           candidate = addMonths(candidate, 12,
               anchorDay: firstBillDate.day,
-              ignoreWeekendShift: ignoreWeekendShift);
+              ignoreWeekendShift: ignoreWeekendShift,
+              autoShiftWeekends: autoShiftWeekends);
           break;
       }
     }
@@ -63,7 +67,9 @@ class BillingCalculator {
   }
 
   static DateTime addMonths(DateTime date, int monthsToAdd,
-      {int? anchorDay, bool ignoreWeekendShift = false}) {
+      {int? anchorDay,
+      bool ignoreWeekendShift = false,
+      bool autoShiftWeekends = true}) {
     // Calculate total months to determine target year and month
     var totalMonths = (date.year * 12) + (date.month - 1) + monthsToAdd;
 
@@ -77,10 +83,12 @@ class BillingCalculator {
     // DateTime(y, m + 1, 0).day gives the last day of month m
     int daysInTargetMonth = DateTime(y, m + 1, 0).day;
 
+    final bool shouldShift = autoShiftWeekends && !ignoreWeekendShift;
+
     if (d > daysInTargetMonth) {
       d = daysInTargetMonth;
 
-      if (!ignoreWeekendShift) {
+      if (shouldShift) {
         // Find last available working day in this month
         DateTime targetDate = DateTime(y, m, d);
         if (targetDate.weekday == DateTime.saturday) {
@@ -89,6 +97,28 @@ class BillingCalculator {
         } else if (targetDate.weekday == DateTime.sunday) {
           targetDate = targetDate.subtract(const Duration(days: 2));
           d = targetDate.day;
+        }
+      }
+    } else if (shouldShift) {
+      // Apply weekend rule to the candidate date
+      DateTime targetDate = DateTime(y, m, d);
+      if (targetDate.weekday == DateTime.saturday) {
+        // Try Monday (add 2 days)
+        final monday = targetDate.add(const Duration(days: 2));
+        if (monday.month == targetDate.month) {
+          d = monday.day;
+        } else {
+          // Monday crosses month boundary → use Friday (subtract 1 day)
+          d = targetDate.subtract(const Duration(days: 1)).day;
+        }
+      } else if (targetDate.weekday == DateTime.sunday) {
+        // Try Monday (add 1 day)
+        final monday = targetDate.add(const Duration(days: 1));
+        if (monday.month == targetDate.month) {
+          d = monday.day;
+        } else {
+          // Monday crosses month boundary → use Friday (subtract 2 days)
+          d = targetDate.subtract(const Duration(days: 2)).day;
         }
       }
     }

@@ -23,6 +23,9 @@ class FakeSettingsController extends SettingsController {
 void main() {
   testWidgets('Settings Screen displays theme, currency, and wipe data option',
       (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -45,5 +48,7 @@ void main() {
 
     // Verify Wipe Data Button
     expect(find.text('Wipe Data'), findsWidgets);
+
+    addTearDown(() => tester.view.resetPhysicalSize());
   });
 }

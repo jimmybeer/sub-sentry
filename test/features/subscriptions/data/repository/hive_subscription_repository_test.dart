@@ -33,7 +33,9 @@ void main() {
     try {
       await Hive.deleteFromDisk();
       await tempDir.delete(recursive: true);
-    } catch (e) {}
+    } catch (e) {
+      // Ignored: cleanup error during tests is acceptable if files are already gone
+    }
   });
 
   test('getAllSubscriptions should return empty list initially', () async {

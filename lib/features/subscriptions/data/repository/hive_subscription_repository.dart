@@ -20,6 +20,14 @@ class HiveSubscriptionRepository implements SubscriptionRepository {
   }
 
   @override
+  Future<void> batchSaveSubscriptions(List<Subscription> subs) async {
+    final entries = {
+      for (final sub in subs) sub.id: SubscriptionModel.fromEntity(sub)
+    };
+    await box.putAll(entries);
+  }
+
+  @override
   Future<void> deleteSubscription(String id) async {
     await box.delete(id);
   }

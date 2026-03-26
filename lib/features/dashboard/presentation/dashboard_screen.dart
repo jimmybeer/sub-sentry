@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../analysis/presentation/providers/analysis_provider.dart';
 import '../../analysis/presentation/widgets/breakdown_chart.dart';
 import '../../analysis/presentation/widgets/pulse_chart.dart';
@@ -27,12 +28,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final selectedMonth = ref.watch(selectedMonthProvider);
     final settingsAsync = ref.watch(settingsControllerProvider);
     final payDays = settingsAsync.valueOrNull?.payDays ?? [];
+    final currencyCode = settingsAsync.valueOrNull?.currencyCode ?? 'GBP';
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Vault'),
         centerTitle: false,
         actions: [
+          if (asyncSubs.hasValue && asyncSubs.value!.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                Icons.filter_list,
+                color: ref.watch(paymentSourceFilterProvider).isNotEmpty
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+              ),
+              onPressed: () =>
+                  _showFilterDialog(context, ref, asyncSubs.value!),
+            ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => context.go('/home/settings'),
@@ -132,7 +145,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .surfaceContainerHighest
-                                      .withOpacity(0.5),
+                                      .withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
@@ -154,6 +167,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                         showWeekends: settingsAsync.valueOrNull
                                                 ?.autoShiftWeekendPayments ??
                                             false,
+                                        showToday: settingsAsync.valueOrNull
+                                                ?.showTodayIndicator ??
+                                            true,
+                                        todayDate: DateTime.now(),
                                       )
                                     : BreakdownChart(
                                         key: const ValueKey('Breakdown'),
@@ -182,7 +199,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               ),
                               const Spacer(),
                               Text(
-                                'Run Rate: £${stats.totalNormalizedMonthlyCost.toStringAsFixed(2)}/mo',
+                                'Run Rate: ${formatCurrency(stats.totalNormalizedMonthlyCost, currencyCode)}/mo',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -238,7 +255,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       child: GestureDetector(
         onTap: () => setState(() => _selectedTabIndex = index),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             color: isSelected
                 ? Theme.of(context).colorScheme.primaryContainer
@@ -278,7 +295,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       leading: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
-      backgroundColor: Colors.orange.withOpacity(0.1),
+      backgroundColor: Colors.orange.withValues(alpha: 0.1),
       actions: [
         TextButton(
           onPressed: () => _showExpiredContractsDialog(context, ref, expired),
@@ -379,6 +396,82 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showFilterDialog(
+      BuildContext context, WidgetRef ref, List<Subscription> subs) {
+    final allSources = subs.map((s) {
+      final source = s.paymentSource?.trim();
+      return (source == null || source.isEmpty) ? 'Untagged' : source;
+    }).toSet();
+
+    final sortedSources = allSources.toList()..sort();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final localFilter = ref.watch(paymentSourceFilterProvider);
+
+            return AlertDialog(
+              title: const Text('Filter by Payment Source'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => ref
+                              .read(paymentSourceFilterProvider.notifier)
+                              .state = {},
+                          child: const Text('Show All'),
+                        ),
+                      ],
+                    ),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: sortedSources.map((source) {
+                            final isSelected = localFilter.contains(source);
+                            return FilterChip(
+                              label: Text(source),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                final newSet = Set<String>.from(localFilter);
+                                if (selected) {
+                                  newSet.add(source);
+                                } else {
+                                  newSet.remove(source);
+                                }
+                                ref
+                                    .read(paymentSourceFilterProvider.notifier)
+                                    .state = newSet;
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

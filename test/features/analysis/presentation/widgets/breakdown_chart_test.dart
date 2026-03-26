@@ -1,9 +1,16 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sub_sentry/features/analysis/logic/subscription_stats_logic.dart';
 import 'package:sub_sentry/features/analysis/presentation/widgets/breakdown_chart.dart';
+import 'package:sub_sentry/features/settings/presentation/providers/settings_controller.dart';
 import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
+
+class _FakeSettingsController extends SettingsController {
+  @override
+  Future<SettingsState> build() async => const SettingsState();
+}
 
 void main() {
   testWidgets('BreakdownChart displays PieChart and stats', (tester) async {
@@ -28,7 +35,14 @@ void main() {
     );
 
     await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: BreakdownChart(stats: stats))));
+      ProviderScope(
+        overrides: [
+          settingsControllerProvider
+              .overrideWith(() => _FakeSettingsController()),
+        ],
+        child: MaterialApp(home: Scaffold(body: BreakdownChart(stats: stats))),
+      ),
+    );
 
     // Initially fails -> Red
     expect(find.byType(PieChart), findsOneWidget);

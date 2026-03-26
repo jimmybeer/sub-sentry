@@ -19,20 +19,26 @@ dependencies:
   # Local DB
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  flutter_secure_storage: ^9.2.2
 
   # UI / Assets
-  google_fonts: ^6.2.1
   fl_chart: ^0.68.0
   intl: ^0.20.2
   
   # Utils
   uuid: ^4.4.0
+  url_launcher: ^6.3.0
+  package_info_plus: ^8.0.0
   cupertino_icons: ^1.0.6
   flutter_local_notifications: ^20.0.0
   timezone: ^0.10.1
   permission_handler: ^12.0.1
   flutter_localizations:
     sdk: flutter
+  csv: ^7.1.0
+  file_picker: ^10.3.10
+  path_provider: ^2.1.5
+  share_plus: ^12.0.1
 
 dev_dependencies:
   sentry_dart_plugin: ^3.2.1
@@ -53,6 +59,14 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/fonts/
+  fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit[wght].ttf
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter[wght].ttf
 
 sentry:
   upload_debug_symbols: true

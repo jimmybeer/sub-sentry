@@ -61,7 +61,12 @@ void main() {
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();
 
-    // 3. Verify Ready Page and Tap Get Started
+    // 3. Verify Notifications Page
+    expect(find.text('Stay Updated'), findsOneWidget);
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    // 4. Verify Ready Page and Tap Get Started
     expect(find.text("You're All Set!"), findsOneWidget);
     await tester.tap(find.text('Get Started'));
     await tester.pumpAndSettle();

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:sub_sentry/l10n/generated/app_localizations.dart';
 import 'app_error.dart';
@@ -37,10 +37,16 @@ class ErrorHandler {
   }
 
   static void handleError(BuildContext context, dynamic error,
-      {StackTrace? stackTrace, VoidCallback? onRetry}) {
+      [StackTrace? stackTrace, String? userMessage]) {
     log(error, stackTrace);
 
-    // In a real app, you might show a SnackBar or Dialog here
-    // For now, this is just a central logic point
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(userMessage ?? 'Something went wrong. Please try again.'),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
   }
 }

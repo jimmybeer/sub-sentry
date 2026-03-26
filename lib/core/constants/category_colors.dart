@@ -41,6 +41,6 @@ class CategoryColors {
 
   /// Get color with opacity for backgrounds
   static Color getColorWithOpacity(SubCategory category, double opacity) {
-    return getColor(category).withOpacity(opacity);
+    return getColor(category).withValues(alpha: opacity);
   }
 }

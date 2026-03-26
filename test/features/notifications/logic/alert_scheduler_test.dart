@@ -8,7 +8,6 @@ void main() {
     test(
         'calculateWeeklySummary returns correct total and list for included subscriptions',
         () {
-      final now = DateTime(2023, 10, 22); // Sunday
       final nextMonday = DateTime(2023, 10, 23); // Monday
 
       final sub1 = Subscription(
@@ -39,7 +38,7 @@ void main() {
 
       final subs = [sub1, sub2];
 
-      final result = AlertScheduler.calculateWeeklySummary(subs, nextMonday);
+      final result = AlertScheduler.calculateWeeklySummary(subs, nextMonday, 'GBP');
 
       expect(result.title, 'This week\'s outgoings');
       expect(result.body, contains('£45.00'));
@@ -77,7 +76,7 @@ void main() {
       );
 
       final result =
-          AlertScheduler.calculateWeeklySummary([sub1, sub2], nextMonday);
+          AlertScheduler.calculateWeeklySummary([sub1, sub2], nextMonday, 'GBP');
 
       expect(result.body, contains('£10.00'));
       expect(result.body, isNot(contains('£30.00')));
@@ -103,13 +102,15 @@ void main() {
 
       final dates = AlertScheduler.calculateTrialAlertDates(sub);
 
-      expect(dates.length, 3);
-      // 5 days before
-      expect(dates[0], trialEnd.subtract(const Duration(days: 5)));
-      // 3 days before
-      expect(dates[1], trialEnd.subtract(const Duration(days: 3)));
-      // 24 hours before
-      expect(dates[2], trialEnd.subtract(const Duration(hours: 24)));
+      expect(dates.length, 4);
+      // 5 days before at 09:00
+      expect(dates[0], DateTime(2023, 10, 25, 9, 0, 0, 0));
+      // 3 days before at 09:00
+      expect(dates[1], DateTime(2023, 10, 27, 9, 0, 0, 0));
+      // 1 day before at 09:00
+      expect(dates[2], DateTime(2023, 10, 29, 9, 0, 0, 0));
+      // Day-of at 09:00
+      expect(dates[3], DateTime(2023, 10, 30, 9, 0, 0, 0));
     });
   });
 }

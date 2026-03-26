@@ -1,22 +1,24 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../logic/subscription_stats_logic.dart';
 import '../../../subscriptions/domain/subscription.dart'; // For SubCategory
 import '../../../../core/constants/category_colors.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../settings/presentation/providers/settings_controller.dart';
 
 enum BreakdownView { actualMonth, monthlyAverage }
 
-class BreakdownChart extends StatefulWidget {
+class BreakdownChart extends ConsumerStatefulWidget {
   final SubscriptionStats stats;
 
   const BreakdownChart({super.key, required this.stats});
 
   @override
-  State<BreakdownChart> createState() => _BreakdownChartState();
+  ConsumerState<BreakdownChart> createState() => _BreakdownChartState();
 }
 
-class _BreakdownChartState extends State<BreakdownChart> {
+class _BreakdownChartState extends ConsumerState<BreakdownChart> {
   int touchedIndex = -1;
   BreakdownView currentView = BreakdownView.actualMonth; // Default to actual
 
@@ -37,7 +39,8 @@ class _BreakdownChartState extends State<BreakdownChart> {
       );
     }
 
-    final currencyFormat = NumberFormat.simpleCurrency(locale: 'en_GB');
+    final currencyCode = ref.watch(
+        settingsControllerProvider.select((s) => s.value?.currencyCode ?? 'GBP'));
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -60,8 +63,8 @@ class _BreakdownChartState extends State<BreakdownChart> {
                 decoration: BoxDecoration(
                   color: Theme.of(context)
                       .colorScheme
-                      .surfaceVariant
-                      .withOpacity(0.5),
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -118,7 +121,7 @@ class _BreakdownChartState extends State<BreakdownChart> {
                           style: const TextStyle(
                               fontSize: 10, color: Colors.grey)),
                       Text(
-                        currencyFormat.format(total),
+                        formatCurrency(total, currencyCode),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,

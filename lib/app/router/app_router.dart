@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -13,20 +14,22 @@ part 'app_router.g.dart';
 
 @Riverpod(keepAlive: true)
 GoRouter goRouter(GoRouterRef ref) {
-  // Watch settings to trigger rebuild on change
-  final settingsAsync = ref.watch(settingsControllerProvider);
+  // Only watch hasSeenOnboarding to trigger redirect when it changes.
+  // We don't watch the whole settings provider to avoid recreating the router
+  // on every setting change (which would close the settings screen).
+  final hasSeenOnboarding = ref.watch(
+    settingsControllerProvider.select((s) => s.valueOrNull?.hasSeenOnboarding),
+  );
 
   return GoRouter(
     initialLocation: '/home',
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
     redirect: (context, state) {
-      final settings = settingsAsync.valueOrNull;
-
-      // If settings are loading, don't redirect yet (or show splash)
-      if (settings == null) return null;
+      // If settings are loading, don't redirect yet
+      if (hasSeenOnboarding == null) return null;
 
       final onOnboarding = state.uri.path == '/onboarding';
-      final seen = settings.hasSeenOnboarding;
+      final seen = hasSeenOnboarding;
 
       if (!seen && !onOnboarding) {
         return '/onboarding';

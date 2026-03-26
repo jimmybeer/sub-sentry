@@ -1,26 +1,32 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sub_sentry/core/constants/category_colors.dart';
-import 'package:sub_sentry/features/subscriptions/domain/subscription.dart';
+import 'package:sub_sentry/core/utils/currency_formatter.dart';
 import 'package:sub_sentry/features/analysis/logic/subscription_stats_logic.dart';
+import 'package:sub_sentry/features/settings/presentation/providers/settings_controller.dart';
 
-class PulseChart extends StatefulWidget {
+class PulseChart extends ConsumerStatefulWidget {
   final SubscriptionStats stats;
   final List<int> payDays;
   final bool showWeekends;
+  final bool showToday;
+  final DateTime? todayDate;
 
-  const PulseChart(
-      {super.key,
-      required this.stats,
-      this.payDays = const [],
-      this.showWeekends = false});
+  const PulseChart({
+    super.key,
+    required this.stats,
+    this.payDays = const [],
+    this.showWeekends = false,
+    this.showToday = false,
+    this.todayDate,
+  });
 
   @override
-  State<PulseChart> createState() => _PulseChartState();
+  ConsumerState<PulseChart> createState() => _PulseChartState();
 }
 
-class _PulseChartState extends State<PulseChart> {
+class _PulseChartState extends ConsumerState<PulseChart> {
   bool _showCumulative = true;
 
   List<VerticalRangeAnnotation> _getWeekendRanges(
@@ -35,8 +41,8 @@ class _PulseChartState extends State<PulseChart> {
             x1: day - 0.5,
             x2: day + 0.5,
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.grey.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.grey.withValues(alpha: 0.15)
+                : Colors.grey.withValues(alpha: 0.1),
           ),
         );
       }
@@ -46,6 +52,8 @@ class _PulseChartState extends State<PulseChart> {
 
   @override
   Widget build(BuildContext context) {
+    final currencyCode = ref.watch(
+        settingsControllerProvider.select((s) => s.value?.currencyCode ?? 'GBP'));
     final stats = widget.stats;
     final year = stats.month.year;
     final month = stats.month.month;
@@ -108,8 +116,8 @@ class _PulseChartState extends State<PulseChart> {
               show: true,
               toY: sharedMaxY,
               color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withOpacity(0.03)
-                  : Colors.grey.withOpacity(0.05),
+                  ? Colors.white.withValues(alpha: 0.03)
+                  : Colors.grey.withValues(alpha: 0.05),
             ),
           ),
         ],
@@ -184,8 +192,7 @@ class _PulseChartState extends State<PulseChart> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        NumberFormat.simpleCurrency(locale: 'en_GB')
-                            .format(stats.projectedCashflowTotal),
+                        formatCurrency(stats.projectedCashflowTotal, currencyCode),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).primaryColor,
@@ -225,7 +232,7 @@ class _PulseChartState extends State<PulseChart> {
                         getTooltipColor: (_) => Colors.blueGrey,
                         getTooltipItem: (group, groupIndex, rod, rodIndex) {
                           return BarTooltipItem(
-                            'Day ${group.x.toInt()}\n£${rod.toY.toStringAsFixed(2)}',
+                            'Day ${group.x.toInt()}\n${formatCurrency(rod.toY, currencyCode)}',
                             const TextStyle(color: Colors.white),
                           );
                         },
@@ -261,11 +268,11 @@ class _PulseChartState extends State<PulseChart> {
                           dotData: const FlDotData(show: false),
                           belowBarData: BarAreaData(
                             show: true,
-                            color: Colors.orangeAccent.withOpacity(0.05),
+                            color: Colors.orangeAccent.withValues(alpha: 0.05),
                             gradient: LinearGradient(
                               colors: [
-                                Colors.orangeAccent.withOpacity(0.2),
-                                Colors.orangeAccent.withOpacity(0.0),
+                                Colors.orangeAccent.withValues(alpha: 0.2),
+                                Colors.orangeAccent.withValues(alpha: 0.0),
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -279,7 +286,7 @@ class _PulseChartState extends State<PulseChart> {
                             getTooltipItems: (touchedSpots) {
                               return touchedSpots.map((spot) {
                                 return LineTooltipItem(
-                                  'Day ${spot.x.toInt()}\n£${spot.y.toStringAsFixed(2)}',
+                                  'Day ${spot.x.toInt()}\n${formatCurrency(spot.y, currencyCode)}',
                                   const TextStyle(color: Colors.white),
                                 );
                               }).toList();
@@ -312,27 +319,54 @@ class _PulseChartState extends State<PulseChart> {
                           ),
                         ],
                         extraLinesData: ExtraLinesData(
-                          verticalLines: widget.payDays
-                              .where((d) => d <= daysInMonth)
-                              .map((day) {
-                            return VerticalLine(
-                              x: day.toDouble(),
-                              color: Colors.green, // Stronger opacity
-                              strokeWidth: 2, // Thicker
-                              dashArray: [4, 4],
-                              label: VerticalLineLabel(
-                                show: true,
-                                alignment: Alignment.topRight,
-                                style: const TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  height: 0.8,
+                          verticalLines: [
+                            if (widget.showToday && widget.todayDate != null)
+                              ...() {
+                                final now = widget.todayDate!;
+                                if (now.year == year && now.month == month) {
+                                  return [
+                                    VerticalLine(
+                                      x: now.day.toDouble(),
+                                      color: Colors.blueAccent,
+                                      strokeWidth: 2.5,
+                                      label: VerticalLineLabel(
+                                        show: true,
+                                        alignment: Alignment.topLeft,
+                                        style: const TextStyle(
+                                          color: Colors.blueAccent,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          height: 0.8,
+                                        ),
+                                        labelResolver: (_) => 'TODAY',
+                                      ),
+                                    )
+                                  ];
+                                }
+                                return <VerticalLine>[];
+                              }(),
+                            ...widget.payDays
+                                .where((d) => d <= daysInMonth)
+                                .map((day) {
+                              return VerticalLine(
+                                x: day.toDouble(),
+                                color: Colors.green, // Stronger opacity
+                                strokeWidth: 2, // Thicker
+                                dashArray: [4, 4],
+                                label: VerticalLineLabel(
+                                  show: true,
+                                  alignment: Alignment.topRight,
+                                  style: const TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    height: 0.8,
+                                  ),
+                                  labelResolver: (_) => 'PAY',
                                 ),
-                                labelResolver: (_) => 'PAY',
-                              ),
-                            );
-                          }).toList(),
+                              );
+                            }),
+                          ],
                         ),
                         lineTouchData: const LineTouchData(enabled: false),
                       ),
@@ -365,11 +399,14 @@ class _AnalysisToggleButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.orangeAccent
-              : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+              : Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(

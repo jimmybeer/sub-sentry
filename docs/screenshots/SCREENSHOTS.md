@@ -34,8 +34,8 @@ Capture in this order to minimise navigation back-and-forth.
 **Navigate to:** Analysis tab
 
 **What to show:**
-- Both the Pulse chart (stacked bars + cumulative line) and the Spending Breakdown donut visible simultaneously without scrolling
-- If both can't fit on one screen, prioritise the Pulse chart — the stacked coloured bars across the month is the more distinctive visual
+- The Pulse chart (stacked bars + cumulative line) — scroll until it fills the screen
+- The Spending Breakdown donut sits further down and won't fit simultaneously, so don't try to show both
 - Bars should span multiple days with at least 3 category colours visible
 
 **The shot:** A screen full of rich, colourful data. The viewer should immediately think "I can see exactly where my money goes."
@@ -67,7 +67,7 @@ Capture in this order to minimise navigation back-and-forth.
 
 ---
 
-### Frame 03 — Trial Killer
+### Frame 03 — Trial Reminder
 **Add one new subscription for this screenshot only:**
 
 | Field | Value |
@@ -81,11 +81,10 @@ Capture in this order to minimise navigation back-and-forth.
 **Navigate to:** The Amazon Prime card or detail screen
 
 **What to show:**
-- The trial badge or warning indicator in its urgent state (triggered by the tomorrow end date)
-- The 24-hour warning UI — whatever the app shows when a trial is about to convert
+- The trial badge on the card and the red urgency glow (triggered by the tomorrow end date)
 - The trial end date visible on screen
 
-**The shot:** Visual urgency. The viewer should feel the time pressure. The warm brown frame background was matched specifically to complement a warning/alert colour state.
+**The shot:** A card that communicates urgency calmly — the viewer should think "it reminded me, and I had time to act." The warm brown frame background complements the warning colour state.
 
 ---
 

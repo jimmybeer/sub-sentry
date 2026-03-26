@@ -6,7 +6,9 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../settings/presentation/providers/settings_controller.dart';
 import '../../domain/subscription.dart';
 
-class SubscriptionCard extends ConsumerWidget {
+enum _UrgencyLevel { none, low, medium, high }
+
+class SubscriptionCard extends ConsumerStatefulWidget {
   final Subscription subscription;
   final VoidCallback? onTap;
 
@@ -15,6 +17,33 @@ class SubscriptionCard extends ConsumerWidget {
     required this.subscription,
     this.onTap,
   });
+
+  @override
+  ConsumerState<SubscriptionCard> createState() => _SubscriptionCardState();
+}
+
+class _SubscriptionCardState extends ConsumerState<SubscriptionCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _pulseAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
 
   Color _parseColor(String? hex) {
     if (hex == null || hex.isEmpty) return Colors.grey;
@@ -27,13 +56,92 @@ class SubscriptionCard extends ConsumerWidget {
     }
   }
 
+  _UrgencyLevel _computeUrgency(DateTime nextDate) {
+    if (widget.subscription.status != SubStatus.active) return _UrgencyLevel.none;
+
+    final now = DateTime.now();
+    int? minDays;
+
+    void consider(int days) {
+      if (days >= 0 && (minDays == null || days < minDays!)) minDays = days;
+    }
+
+    if (widget.subscription.isTrial && widget.subscription.trialEndDate != null) {
+      consider(widget.subscription.trialEndDate!.difference(now).inDays);
+    }
+
+    if (widget.subscription.contractEndDate != null &&
+        widget.subscription.contractEndDate!.isAfter(now)) {
+      consider(widget.subscription.contractEndDate!.difference(now).inDays);
+    }
+
+    // Next bill date only for long-term cycles to avoid weekly/monthly noise
+    final isLongTerm = widget.subscription.cycle == BillingCycle.yearly ||
+        widget.subscription.cycle == BillingCycle.quarterly;
+    if (isLongTerm) {
+      consider(nextDate.difference(now).inDays);
+    }
+
+    if (minDays == null) return _UrgencyLevel.none;
+    if (minDays! <= 3) return _UrgencyLevel.high;
+    if (minDays! <= 7) return _UrgencyLevel.medium;
+    if (minDays! <= 14) return _UrgencyLevel.low;
+    return _UrgencyLevel.none;
+  }
+
+  void _syncAnimation(_UrgencyLevel urgency) {
+    if (!mounted) return;
+
+    Duration? targetDuration;
+    switch (urgency) {
+      case _UrgencyLevel.high:
+        targetDuration = const Duration(milliseconds: 800);
+        break;
+      case _UrgencyLevel.medium:
+        targetDuration = const Duration(milliseconds: 1500);
+        break;
+      case _UrgencyLevel.low:
+        targetDuration = const Duration(milliseconds: 2500);
+        break;
+      case _UrgencyLevel.none:
+        break;
+    }
+
+    if (targetDuration == null) {
+      if (_pulseController.isAnimating) {
+        _pulseController.stop();
+        _pulseController.value = 0;
+      }
+      return;
+    }
+
+    if (_pulseController.duration != targetDuration || !_pulseController.isAnimating) {
+      _pulseController.duration = targetDuration;
+      _pulseController.repeat(reverse: true);
+    }
+  }
+
+  Color _urgencyColor(_UrgencyLevel urgency) {
+    switch (urgency) {
+      case _UrgencyLevel.high:
+        return Colors.red.shade600;
+      case _UrgencyLevel.medium:
+        return Colors.orange.shade600;
+      case _UrgencyLevel.low:
+        return Colors.amber.shade600;
+      case _UrgencyLevel.none:
+        return Colors.transparent;
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final currencyCode = ref.watch(
         settingsControllerProvider.select((s) => s.value?.currencyCode ?? 'GBP'));
     final autoShiftWeekends = ref.watch(settingsControllerProvider
         .select((s) => s.value?.autoShiftWeekendPayments ?? true));
 
+    final subscription = widget.subscription;
     final nextDate = BillingCalculator.calculateNextBillDate(
         subscription.firstBillDate, subscription.cycle,
         overrideDate: subscription.nextBillOverride,
@@ -41,40 +149,63 @@ class SubscriptionCard extends ConsumerWidget {
         autoShiftWeekends: autoShiftWeekends);
 
     final costStr = formatCurrency(subscription.cost, currencyCode);
-
-    // Capitalize only first letter
     final cycleName = subscription.cycle.name;
     final cycleStr = cycleName[0].toUpperCase() + cycleName.substring(1);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0F4C5C).withValues(alpha: 0.08),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
+    final urgency = _computeUrgency(nextDate);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncAnimation(urgency));
+
+    final urgencyColor = _urgencyColor(urgency);
+
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        final t = urgency != _UrgencyLevel.none ? _pulseAnimation.value : 0.0;
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardTheme.color,
+            borderRadius: BorderRadius.circular(16),
+            border: urgency != _UrgencyLevel.none
+                ? Border.all(
+                    color: urgencyColor.withValues(alpha: 0.4 + 0.6 * t),
+                    width: 1.5,
+                  )
+                : null,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F4C5C).withValues(alpha: 0.08),
+                offset: const Offset(0, 4),
+                blurRadius: 12,
+              ),
+              if (urgency != _UrgencyLevel.none)
+                BoxShadow(
+                  color: urgencyColor.withValues(alpha: 0.15 + 0.25 * t),
+                  blurRadius: 8 + 8 * t,
+                  spreadRadius: 1 + 2 * t,
+                ),
+            ],
           ),
-        ],
-      ),
+          child: child,
+        );
+      },
+      // child is built once and passed through AnimatedBuilder for efficiency
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
+          onTap: widget.onTap,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                // Color Indicator
+                // Color indicator
                 Container(
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: _parseColor(subscription.colorHex)
-                        .withValues(alpha: 0.2),
+                    color: _parseColor(subscription.colorHex).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
@@ -99,10 +230,9 @@ class SubscriptionCard extends ConsumerWidget {
                     children: [
                       Text(
                         subscription.name,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -136,8 +266,7 @@ class SubscriptionCard extends ConsumerWidget {
     final now = DateTime.now();
     final List<Widget> icons = [];
 
-    // Paused / Canceled
-    if (subscription.status == SubStatus.paused) {
+    if (widget.subscription.status == SubStatus.paused) {
       icons.add(const Tooltip(
         showDuration: Duration(seconds: 4),
         triggerMode: TooltipTriggerMode.tap,
@@ -147,7 +276,7 @@ class SubscriptionCard extends ConsumerWidget {
           child: Icon(Icons.pause, color: Colors.orange, size: 18),
         ),
       ));
-    } else if (subscription.status == SubStatus.canceled) {
+    } else if (widget.subscription.status == SubStatus.canceled) {
       icons.add(const Tooltip(
         showDuration: Duration(seconds: 4),
         triggerMode: TooltipTriggerMode.tap,
@@ -159,15 +288,12 @@ class SubscriptionCard extends ConsumerWidget {
       ));
     }
 
-    // Trial
-    if (subscription.isTrial) {
-      final daysLeft = subscription.trialEndDate?.difference(now).inDays;
-      // Only show if trialEndDate is null (indefinite) or not passed (daysLeft >= 0)
-      // Only show if trialEndDate is null (indefinite) or not passed (daysLeft >= 0)
+    if (widget.subscription.isTrial) {
+      final daysLeft = widget.subscription.trialEndDate?.difference(now).inDays;
       if (daysLeft == null || daysLeft >= 0) {
         String msg = 'Free Trial';
-        if (subscription.trialEndDate != null) {
-          final dateStr = DateFormat.yMMMd().format(subscription.trialEndDate!);
+        if (widget.subscription.trialEndDate != null) {
+          final dateStr = DateFormat.yMMMd().format(widget.subscription.trialEndDate!);
           msg = 'Trial ends $dateStr (${daysLeft ?? 0} days)';
         }
         icons.add(Tooltip(
@@ -183,25 +309,22 @@ class SubscriptionCard extends ConsumerWidget {
       }
     }
 
-    // Contract
-    if (subscription.contractEndDate != null &&
-        subscription.contractEndDate!.isAfter(now)) {
+    if (widget.subscription.contractEndDate != null &&
+        widget.subscription.contractEndDate!.isAfter(now)) {
       icons.add(Tooltip(
         showDuration: const Duration(seconds: 4),
         triggerMode: TooltipTriggerMode.tap,
         message:
-            'Contract ends ${DateFormat.yMMMd().format(subscription.contractEndDate!)}',
+            'Contract ends ${DateFormat.yMMMd().format(widget.subscription.contractEndDate!)}',
         child: const Padding(
           padding: EdgeInsets.only(right: 8),
-          child:
-              Icon(Icons.description_outlined, color: Colors.purple, size: 18),
+          child: Icon(Icons.description_outlined, color: Colors.purple, size: 18),
         ),
       ));
     }
 
-    // Renewal Due (Long term cycles only to avoid noise on monthly)
-    final isLongTerm = subscription.cycle == BillingCycle.yearly ||
-        subscription.cycle == BillingCycle.quarterly;
+    final isLongTerm = widget.subscription.cycle == BillingCycle.yearly ||
+        widget.subscription.cycle == BillingCycle.quarterly;
     if (isLongTerm &&
         nextDate.month == now.month &&
         nextDate.year == now.year) {
@@ -217,7 +340,6 @@ class SubscriptionCard extends ConsumerWidget {
     }
 
     if (icons.isEmpty) return const SizedBox.shrink();
-
     return Row(children: icons);
   }
 }

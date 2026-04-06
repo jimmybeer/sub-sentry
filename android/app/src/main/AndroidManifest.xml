@@ -1,18 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
-    <!--
-        USE_EXACT_ALARM: Required to schedule subscription renewal and trial
-        expiry notifications at precise dates and times. SubSentry is a
-        subscription tracker whose core value proposition is alerting users
-        before they are charged. Imprecise alarms (AlarmManager.set or
-        setInexactRepeating) could fire hours late, making the alerts useless.
-
-        This permission is declared in Play Console under:
-        App content > Alarms & Reminders > [justification submitted].
-    -->
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />

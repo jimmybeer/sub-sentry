@@ -91,7 +91,7 @@ These aren't decorative charts. They're the answer to "where does my money actua
 
 **ADD A SUBSCRIPTION IN UNDER 10 SECONDS.**
 
-Start typing "Net..." and SubSentry suggests Netflix with the price already filled in. Category colours are applied automatically. Hit save — you're done.
+Fill in the name, cost, and renewal date — category colours are applied automatically. Hit save — you're done.
 
 No faff. No multi-step wizards. No mandatory fields you have to invent answers for.
 
@@ -216,7 +216,7 @@ If you delete the app, your data is gone. Not archived. Not sold. Gone.
 
 **QUICK TO USE**
 
-Add a subscription in under 10 seconds. Start typing a name and SubSentry suggests the service with the default price pre-filled. Category colours are set automatically. Done.
+Add a subscription in under 10 seconds. Fill in the name, cost, and renewal date — category colours are applied automatically. Done.
 
 Supports weekly, monthly, quarterly, and annual billing cycles. Handles free trials, paused subscriptions, and long-term contracts.
 

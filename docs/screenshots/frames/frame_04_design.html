@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SubSentry — Frame 03: Trial Killer</title>
+  <title>SubSentry — Frame 04: Trials &amp; Contracts</title>
   <!--
     EXPORT: Chrome DevTools → 430×932, DPR=3 → Capture full size screenshot = 1290×2796px
-    SCREENSHOT: A subscription card/detail in Trial Mode.
-    Set trial end date = tomorrow to trigger the urgent "24h" warning state.
+    SCREENSHOT: Add Subscription screen with a trial end date or contract renewal date filled in.
+    The date field must be clearly visible — that's the feature this frame is selling.
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,15 +34,14 @@
       flex-direction: column;
       align-items: center;
       /*
-        DISTINCT background for Frame 3 — deep burnt orange/brown.
-        Signals urgency and control. Breaks the teal run without clashing.
-        This is the "warning" frame — the background reinforces the message.
+        Deep emerald green — distinct from teal (frames 1–2), orange (3), and indigo (5).
+        Signals: adding, growing, positive action. "Put a new sub in."
       */
-      background: linear-gradient(168deg, #351200 0%, #1E0800 50%, #0F0300 100%);
+      background: linear-gradient(168deg, #0A2E18 0%, #051810 50%, #020806 100%);
       flex-shrink: 0;
     }
 
-    /* Warm atmospheric glow — coral-tinted, matching the alert urgency */
+    /* Soft emerald bloom at top */
     .frame::before {
       content: '';
       position: absolute;
@@ -51,7 +50,7 @@
       top: -40px;
       width: 320px;
       height: 500px;
-      background: radial-gradient(ellipse 160px 250px at center, rgba(227, 100, 20, 0.20) 0%, transparent 70%);
+      background: radial-gradient(ellipse 160px 250px at center, rgba(20, 120, 60, 0.22) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -63,7 +62,7 @@
       left: 0;
       right: 0;
       height: 200px;
-      background: linear-gradient(to top, rgba(15, 3, 0, 0.75) 0%, transparent 100%);
+      background: linear-gradient(to top, rgba(2, 8, 6, 0.75) 0%, transparent 100%);
       pointer-events: none;
       z-index: 0;
     }
@@ -99,11 +98,8 @@
       letter-spacing: -1.2px;
     }
 
-    /*
-      Accent on this frame is brighter coral — same hex but feels more
-      intense against the warm dark background. No code change needed.
-    */
-    .headline .accent { color: #E36414; }
+    /* Emerald accent — matches the frame's green identity */
+    .headline .accent { color: #2ECC71; }
 
     .sub {
       font-family: 'Inter', sans-serif;
@@ -132,13 +128,13 @@
       border-radius: 48px;
       padding: 11px;
       position: relative;
-      background: linear-gradient(145deg, #1C1410 0%, #100C08 100%);
+      background: linear-gradient(145deg, #0E1C14 0%, #080F0A 100%);
       box-shadow:
         0 0 0 1.5px rgba(255, 255, 255, 0.13),
         0 0 0 2.5px rgba(255, 255, 255, 0.03),
         0 28px 72px rgba(0, 0, 0, 0.70),
-        /* Warm coral glow under phone — unique to this frame */
-        0 0 80px rgba(227, 100, 20, 0.14);
+        /* Emerald glow under phone */
+        0 0 80px rgba(20, 120, 60, 0.16);
     }
 
     .phone::before {
@@ -149,7 +145,7 @@
       transform: translateX(-50%);
       width: 76px;
       height: 24px;
-      background: #080502;
+      background: #040A06;
       border-radius: 20px;
       z-index: 3;
     }
@@ -167,7 +163,7 @@
     }
 
     /* PLACE YOUR SCREENSHOT: uncomment and set src */
-    /* <img src="../screen_03_trial.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;"> */
+    /* <img src="../screen_04_add.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;"> */
 
     .placeholder {
       display: flex;
@@ -182,15 +178,15 @@
       width: 40px;
       height: 40px;
       border-radius: 12px;
-      background: rgba(227, 100, 20, 0.10);
-      border: 1.5px dashed rgba(227, 100, 20, 0.30);
+      background: rgba(20, 120, 60, 0.10);
+      border: 1.5px dashed rgba(20, 120, 60, 0.30);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Outfit', sans-serif;
       font-size: 18px;
       font-weight: 700;
-      color: rgba(227, 100, 20, 0.55);
+      color: rgba(20, 120, 60, 0.55);
     }
 
     .placeholder-title {
@@ -231,7 +227,7 @@
       width: 3px;
       height: 3px;
       border-radius: 50%;
-      background: rgba(227, 100, 20, 0.40);
+      background: rgba(20, 120, 60, 0.50);
       flex-shrink: 0;
     }
 
@@ -251,9 +247,9 @@
 <body>
 
   <!--
-    FRAME 03 — TRIAL KILLER
-    Story beat: Urgency and control. "You're in charge of the trial, not them."
-    Background: Deep burnt orange/brown — DISTINCT from other frames, signals urgency
+    FRAME 04 — TRIALS & CONTRACTS
+    Story beat: Control over time. "You know exactly when things change."
+    Background: Deep emerald green — distinct from teal (1–2), orange (3), indigo (5)
     Caption: above phone
   -->
   <div class="frame">
@@ -261,26 +257,25 @@
     <header class="caption">
       <div class="wordmark">SubSentry</div>
       <h1 class="headline">
-        Your trial.<br>
-        Your <span class="accent">decision.</span>
+        Trials. Contracts.<br>
+        <span class="accent">Tracked.</span>
       </h1>
-      <p class="sub">A clear reminder before any free trial rolls into a paid plan. Cancel if you want — no stress.</p>
+      <p class="sub">Log a trial end date or a rolling contract renewal — SubSentry watches the clock so you don't have to.</p>
     </header>
 
     <div class="phone-wrap">
       <div class="phone">
         <div class="screen">
-          <!-- PLACE YOUR SCREENSHOT: uncomment the img tag below -->
-          <!-- <img src="../screen_03_trial.png" alt="SubSentry trial mode" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;"> -->
+          <img src="./frame_04.png" alt="SubSentry add subscription" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;">
 
           <div class="placeholder">
-            <div class="placeholder-num">03</div>
-            <div class="placeholder-title">Trial Mode Screen</div>
+            <div class="placeholder-num">04</div>
+            <div class="placeholder-title">Add Subscription Screen</div>
             <div class="placeholder-hint">
-              Subscription in Trial Mode.<br>
-              Set end date = tomorrow<br>
-              to trigger 24h warning state.<br>
-              Trial badge must be visible.
+              Show the add form with a<br>
+              trial end date or contract<br>
+              renewal date filled in.<br>
+              Date field must be visible.
             </div>
           </div>
         </div>
@@ -288,14 +283,14 @@
     </div>
 
     <footer class="badges">
-      <span class="badge">Free Trial Tracking</span>
+      <span class="badge">Free Trial Dates</span>
       <div class="badge-dot"></div>
-      <span class="badge">24-Hour Reminder</span>
+      <span class="badge">Contract Renewals</span>
       <div class="badge-dot"></div>
-      <span class="badge">Always Your Choice</span>
+      <span class="badge">You're Always Informed</span>
     </footer>
 
-    <div class="frame-num">03 / 05</div>
+    <div class="frame-num">04 / 05</div>
 
   </div>
 

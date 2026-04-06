@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SubSentry — Feature Graphic</title>
+  <!--
+    EXPORT: Chrome DevTools → set device to 1024×500, DPR=1 → Capture full size screenshot
+    Output: exactly 1024×500px PNG — correct for Google Play feature graphic.
+
+    NOTE: DPR must be 1 (not 3) this time. The graphic must be exactly 1024×500px.
+    If DPR is not shown, click ⋮ in the device toolbar to reveal it.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 0;
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .frame {
+      width: 1024px;
+      height: 500px;
+      background: linear-gradient(135deg, #0E4057 0%, #072535 55%, #040F14 100%);
+      display: flex;
+      align-items: stretch;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    /* Atmospheric glow — sits behind the text, same as frame 01 */
+    .frame::before {
+      content: '';
+      position: absolute;
+      left: 220px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(ellipse 250px 250px at center, rgba(15, 76, 92, 0.40) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Bottom vignette */
+    .frame::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 130px;
+      background: linear-gradient(to top, rgba(4, 15, 20, 0.65) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── LEFT: Text ── */
+    .text-col {
+      width: 560px;
+      flex-shrink: 0;
+      padding: 0 48px 0 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wordmark {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.32);
+      margin-bottom: 18px;
+    }
+
+    .headline {
+      font-family: 'Outfit', sans-serif;
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1.04;
+      color: #FFFFFF;
+      letter-spacing: -2px;
+      margin-bottom: 16px;
+    }
+
+    .headline .accent { color: #E36414; }
+
+    .sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.55;
+      max-width: 340px;
+      margin-bottom: 28px;
+    }
+
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.32);
+      letter-spacing: 0.4px;
+    }
+
+    .badge-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(227, 100, 20, 0.50);
+      flex-shrink: 0;
+    }
+
+    /* ── RIGHT: Phone ── */
+    .phone-col {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* Glow behind the phone */
+    .phone-col::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      height: 380px;
+      background: radial-gradient(ellipse 140px 190px at center, rgba(15, 76, 92, 0.35) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /*
+      Phone is intentionally taller than the frame (520px vs 500px frame height)
+      so it clips slightly top and bottom — a deliberate "peeking" effect.
+      Proportions match the 258×558 phone in the screenshot frames.
+    */
+    .phone {
+      width: 240px;
+      height: 520px;
+      border-radius: 44px;
+      padding: 10px;
+      background: linear-gradient(145deg, #1C1C2E 0%, #0E0E1A 100%);
+      box-shadow:
+        0 0 0 1.5px rgba(255, 255, 255, 0.16),
+        0 0 0 2.5px rgba(255, 255, 255, 0.04),
+        0 24px 64px rgba(0, 0, 0, 0.70),
+        0 0 70px rgba(15, 76, 92, 0.22);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /* Dynamic Island */
+    .phone::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 62px;
+      height: 20px;
+      background: #08080F;
+      border-radius: 14px;
+      z-index: 3;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 36px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    FEATURE GRAPHIC — 1024×500px
+    Google Play requires this for every app listing.
+    Export at DPR=1 (not 3) to hit exactly 1024×500px.
+  -->
+  <div class="frame">
+
+    <div class="text-col">
+      <div class="wordmark">SubSentry</div>
+      <h1 class="headline">
+        Know before<br>
+        you're <span class="accent">charged.</span>
+      </h1>
+      <p class="sub">Every subscription tracked. Every renewal flagged. 99p, once.</p>
+      <div class="badges">
+        <span class="badge">Pay once</span>
+        <div class="badge-dot"></div>
+        <span class="badge">No bank link</span>
+        <div class="badge-dot"></div>
+        <span class="badge">No ads</span>
+        <div class="badge-dot"></div>
+        <span class="badge">No account</span>
+      </div>
+    </div>
+
+    <div class="phone-col">
+      <div class="phone">
+        <div class="screen">
+          <img src="./frame_01.png" alt="SubSentry dashboard">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SubSentry — Frame 04: Pulse Chart / Analytics</title>
+  <title>SubSentry — Frame 05: Settings</title>
   <!--
     EXPORT: Chrome DevTools → 430×932, DPR=3 → Capture full size screenshot = 1290×2796px
-    SCREENSHOT: Analysis tab — Pulse chart (stacked bars + cumulative line).
-    Scroll so the Pulse chart fills the screen. The donut is further down and won't fit simultaneously.
-    Tip: Have 4–5 subs across different categories so the bars look rich and colourful.
+    SCREENSHOT: Settings screen.
+    Good options:
+      - Theme picker visible (light / dark toggle or segmented control)
+      - Export Data row tapped or visible
+    Either works — show the user is in control of the app itself.
   -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,21 +36,25 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      /* Deep teal — consistent with frames 1 & 2 */
-      background: linear-gradient(168deg, #0E4057 0%, #072535 45%, #040F14 100%);
+      /*
+        Deep indigo/violet — distinct from teal (frames 1–3) and near-black (frame 4).
+        Signals: personalisation, ownership, calm control.
+        The "make it yours" frame lands with a different energy to the urgency frames.
+      */
+      background: linear-gradient(168deg, #1C0A42 0%, #0F0525 50%, #060110 100%);
       flex-shrink: 0;
     }
 
-    /* Glow shifted right for compositional variety across the five frames */
+    /* Soft violet bloom at top — atmospheric, not aggressive */
     .frame::before {
       content: '';
       position: absolute;
-      left: 55%;
+      left: 50%;
       transform: translateX(-50%);
-      top: -30px;
-      width: 300px;
+      top: -40px;
+      width: 320px;
       height: 500px;
-      background: radial-gradient(ellipse 150px 250px at center, rgba(15, 76, 92, 0.30) 0%, transparent 70%);
+      background: radial-gradient(ellipse 160px 250px at center, rgba(120, 60, 220, 0.22) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -59,8 +65,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 180px;
-      background: linear-gradient(to top, rgba(4, 15, 20, 0.65) 0%, transparent 100%);
+      height: 200px;
+      background: linear-gradient(to top, rgba(6, 1, 16, 0.75) 0%, transparent 100%);
       pointer-events: none;
       z-index: 0;
     }
@@ -82,7 +88,7 @@
       font-weight: 600;
       letter-spacing: 3.5px;
       text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.35);
+      color: rgba(255, 255, 255, 0.30);
       margin-bottom: 22px;
     }
 
@@ -96,13 +102,14 @@
       letter-spacing: -1.2px;
     }
 
-    .headline .accent { color: #E36414; }
+    /* Violet accent — matches the frame's indigo identity */
+    .headline .accent { color: #9B5CF6; }
 
     .sub {
       font-family: 'Inter', sans-serif;
       font-size: 14px;
       font-weight: 400;
-      color: rgba(255, 255, 255, 0.58);
+      color: rgba(255, 255, 255, 0.55);
       text-align: center;
       line-height: 1.55;
       margin-top: 14px;
@@ -125,12 +132,13 @@
       border-radius: 48px;
       padding: 11px;
       position: relative;
-      background: linear-gradient(145deg, #1C1C2E 0%, #0E0E1A 100%);
+      background: linear-gradient(145deg, #16102A 0%, #0C0818 100%);
       box-shadow:
-        0 0 0 1.5px rgba(255, 255, 255, 0.16),
-        0 0 0 2.5px rgba(255, 255, 255, 0.04),
-        0 28px 72px rgba(0, 0, 0, 0.65),
-        0 0 80px rgba(15, 76, 92, 0.18);
+        0 0 0 1.5px rgba(255, 255, 255, 0.13),
+        0 0 0 2.5px rgba(255, 255, 255, 0.03),
+        0 28px 72px rgba(0, 0, 0, 0.70),
+        /* Violet glow under phone — unique to this settings frame */
+        0 0 80px rgba(120, 60, 220, 0.16);
     }
 
     .phone::before {
@@ -141,7 +149,7 @@
       transform: translateX(-50%);
       width: 76px;
       height: 24px;
-      background: #08080F;
+      background: #060310;
       border-radius: 20px;
       z-index: 3;
     }
@@ -159,7 +167,7 @@
     }
 
     /* PLACE YOUR SCREENSHOT: uncomment and set src */
-    /* <img src="../screen_04_pulse.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;"> */
+    /* <img src="../screen_05_settings.png" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;"> */
 
     .placeholder {
       display: flex;
@@ -174,15 +182,15 @@
       width: 40px;
       height: 40px;
       border-radius: 12px;
-      background: rgba(15, 76, 92, 0.12);
-      border: 1.5px dashed rgba(15, 76, 92, 0.3);
+      background: rgba(120, 60, 220, 0.10);
+      border: 1.5px dashed rgba(120, 60, 220, 0.30);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Outfit', sans-serif;
       font-size: 18px;
       font-weight: 700;
-      color: rgba(15, 76, 92, 0.5);
+      color: rgba(120, 60, 220, 0.55);
     }
 
     .placeholder-title {
@@ -215,7 +223,7 @@
       font-family: 'Inter', sans-serif;
       font-size: 10px;
       font-weight: 500;
-      color: rgba(255, 255, 255, 0.35);
+      color: rgba(255, 255, 255, 0.32);
       letter-spacing: 0.4px;
     }
 
@@ -223,7 +231,7 @@
       width: 3px;
       height: 3px;
       border-radius: 50%;
-      background: rgba(227, 100, 20, 0.45);
+      background: rgba(120, 60, 220, 0.45);
       flex-shrink: 0;
     }
 
@@ -234,7 +242,7 @@
       font-family: 'Outfit', sans-serif;
       font-size: 10px;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.12);
       letter-spacing: 1px;
       z-index: 1;
     }
@@ -243,9 +251,9 @@
 <body>
 
   <!--
-    FRAME 04 — PULSE CHART / ANALYTICS
-    Story beat: Insight. "You finally understand your money."
-    Background: Deep midnight teal (returns from frame 3's warm departure)
+    FRAME 05 — SETTINGS
+    Story beat: Ownership and polish. "It's yours — theme it, export it, keep it."
+    Background: Deep indigo/violet — DISTINCT from teal (1–3) and near-black (4)
     Caption: above phone
   -->
   <div class="frame">
@@ -253,26 +261,25 @@
     <header class="caption">
       <div class="wordmark">SubSentry</div>
       <h1 class="headline">
-        Your spending,<br>
-        <span class="accent">day by day.</span>
+        Your app.<br>
+        Your <span class="accent">way.</span>
       </h1>
-      <p class="sub">Colour-coded by category, across the whole month. Your money finally makes sense.</p>
+      <p class="sub">Switch themes, export your data, and keep full control — no account, no cloud, no compromise.</p>
     </header>
 
     <div class="phone-wrap">
       <div class="phone">
         <div class="screen">
-          <!-- PLACE YOUR SCREENSHOT: uncomment the img tag below -->
-          <!-- <img src="../screen_04_pulse.png" alt="SubSentry pulse chart" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;"> -->
+          <img src="./frame_05.png" alt="SubSentry settings" style="width:100%;height:100%;object-fit:cover;border-radius:39px;position:absolute;top:0;left:0;">
 
           <div class="placeholder">
-            <div class="placeholder-num">04</div>
-            <div class="placeholder-title">Analysis / Pulse Screen</div>
+            <div class="placeholder-num">05</div>
+            <div class="placeholder-title">Settings Screen</div>
             <div class="placeholder-hint">
-              Pulse chart only — scroll so<br>
-              stacked bars fill the screen.<br>
-              4–5 subs, mixed categories<br>
-              for a colourful display.
+              Show theme picker (light/dark)<br>
+              or Export Data row.<br>
+              Both options work —<br>
+              aim for the theme toggle.
             </div>
           </div>
         </div>
@@ -280,14 +287,14 @@
     </div>
 
     <footer class="badges">
-      <span class="badge">Cashflow Pulse</span>
+      <span class="badge">Light &amp; Dark Themes</span>
       <div class="badge-dot"></div>
-      <span class="badge">Category Breakdown</span>
+      <span class="badge">Export to CSV</span>
       <div class="badge-dot"></div>
-      <span class="badge">At a Glance</span>
+      <span class="badge">Your Data, Your Device</span>
     </footer>
 
-    <div class="frame-num">04 / 05</div>
+    <div class="frame-num">05 / 05</div>
 
   </div>
 

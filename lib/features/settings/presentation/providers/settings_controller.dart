@@ -15,6 +15,7 @@ class SettingsState {
   final String weeklySummaryTime; // "HH:mm"
   final bool trialAlertsEnabled;
   final bool showTodayIndicator;
+  final bool hasBeenPromptedForReview;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -27,6 +28,7 @@ class SettingsState {
     this.weeklySummaryTime = '09:00',
     this.trialAlertsEnabled = true,
     this.showTodayIndicator = true,
+    this.hasBeenPromptedForReview = false,
   });
 
   SettingsState copyWith({
@@ -40,6 +42,7 @@ class SettingsState {
     String? weeklySummaryTime,
     bool? trialAlertsEnabled,
     bool? showTodayIndicator,
+    bool? hasBeenPromptedForReview,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -53,6 +56,8 @@ class SettingsState {
       weeklySummaryTime: weeklySummaryTime ?? this.weeklySummaryTime,
       trialAlertsEnabled: trialAlertsEnabled ?? this.trialAlertsEnabled,
       showTodayIndicator: showTodayIndicator ?? this.showTodayIndicator,
+      hasBeenPromptedForReview:
+          hasBeenPromptedForReview ?? this.hasBeenPromptedForReview,
     );
   }
 }
@@ -78,6 +83,7 @@ class SettingsController extends AsyncNotifier<SettingsState> {
     final summaryTime = _box.get('summary_time', defaultValue: '09:00');
     final trialEnabled = _box.get('trial_enabled', defaultValue: true);
     final showToday = _box.get('show_today_indicator', defaultValue: true);
+    final reviewPrompted = _box.get('review_prompted', defaultValue: false);
 
     return SettingsState(
       themeMode: mode,
@@ -90,14 +96,26 @@ class SettingsController extends AsyncNotifier<SettingsState> {
       weeklySummaryTime: summaryTime,
       trialAlertsEnabled: trialEnabled,
       showTodayIndicator: showToday,
+      hasBeenPromptedForReview: reviewPrompted,
     );
   }
 
-  Future<void> toggleTheme(bool isDark) async {
-    final newMode = isDark ? ThemeMode.dark : ThemeMode.light;
-    await _box.put('theme_mode', isDark ? 'dark' : 'light');
+  Future<void> markReviewPrompted() async {
+    await _box.put('review_prompted', true);
     if (state.value != null) {
-      state = AsyncData(state.value!.copyWith(themeMode: newMode));
+      state = AsyncData(state.value!.copyWith(hasBeenPromptedForReview: true));
+    }
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    final modeStr = switch (mode) {
+      ThemeMode.light  => 'light',
+      ThemeMode.dark   => 'dark',
+      ThemeMode.system => 'system',
+    };
+    await _box.put('theme_mode', modeStr);
+    if (state.value != null) {
+      state = AsyncData(state.value!.copyWith(themeMode: mode));
     }
   }
 

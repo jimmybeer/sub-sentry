@@ -29,17 +29,47 @@ class SettingsScreen extends ConsumerWidget {
         data: (settings) => ListView(
           children: [
             // Theme Mode
-            ListTile(
-              leading: const Icon(Icons.brightness_6),
-              title: const Text('Theme Mode'),
-              subtitle: Text(_themeModeName(settings.themeMode)),
-              trailing: Switch(
-                value: settings.themeMode == ThemeMode.dark,
-                onChanged: (val) {
-                  ref
-                      .read(settingsControllerProvider.notifier)
-                      .toggleTheme(val);
-                },
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.brightness_6, color: Colors.grey),
+                      const SizedBox(width: 16),
+                      Text('Theme Mode',
+                          style: Theme.of(context).textTheme.bodyLarge),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SegmentedButton<ThemeMode>(
+                    showSelectedIcon: false,
+                    segments: const [
+                      ButtonSegment(
+                        value: ThemeMode.system,
+                        icon: Icon(Icons.brightness_auto),
+                        label: Text('System'),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.light,
+                        icon: Icon(Icons.light_mode),
+                        label: Text('Light'),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.dark,
+                        icon: Icon(Icons.dark_mode),
+                        label: Text('Dark'),
+                      ),
+                    ],
+                    selected: {settings.themeMode},
+                    onSelectionChanged: (selection) {
+                      ref
+                          .read(settingsControllerProvider.notifier)
+                          .setThemeMode(selection.first);
+                    },
+                  ),
+                ],
               ),
             ),
             const Divider(),
@@ -247,6 +277,24 @@ class SettingsScreen extends ConsumerWidget {
                       fontWeight: FontWeight.bold, color: Colors.grey)),
             ),
             ListTile(
+              leading: const Icon(Icons.star_rate_outlined),
+              title: const Text('Rate SubSentry'),
+              subtitle: const Text('Enjoying the app? Leave us a review'),
+              trailing: const Icon(Icons.open_in_new, size: 16),
+              onTap: () => launchUrl(
+                Uri.parse(
+                    'https://play.google.com/store/apps/details?id=com.jyapps.subsentry'),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.feedback_outlined),
+              title: const Text('Send Feedback'),
+              subtitle: const Text('Share suggestions or report a problem'),
+              trailing: const Icon(Icons.open_in_new, size: 16),
+              onTap: () => _sendFeedback(context),
+            ),
+            ListTile(
               leading: const Icon(Icons.privacy_tip_outlined),
               title: const Text('Privacy Policy'),
               trailing: const Icon(Icons.open_in_new, size: 16),
@@ -271,6 +319,28 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _sendFeedback(BuildContext context) async {
+    final info = await PackageInfo.fromPlatform();
+    final body = Uri.encodeComponent(
+      'App Version: ${info.version} (${info.buildNumber})\n\n'
+      '---\n'
+      'Your feedback:\n\n',
+    );
+    final subject = Uri.encodeComponent('SubSentry Feedback');
+    final uri = Uri.parse(
+      'mailto:jyappsupport@gmail.com?subject=$subject&body=$body',
+    );
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text(
+                  'No email app found. Please email us at jyappsupport@gmail.com')),
+        );
+      }
+    }
   }
 
   void _exportData(BuildContext context, WidgetRef ref) async {
@@ -305,17 +375,6 @@ class SettingsScreen extends ConsumerWidget {
           SnackBar(content: Text('Import failed: $e')),
         );
       }
-    }
-  }
-
-  String _themeModeName(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.system:
-        return 'System Default';
-      case ThemeMode.light:
-        return 'Light';
-      case ThemeMode.dark:
-        return 'Dark';
     }
   }
 

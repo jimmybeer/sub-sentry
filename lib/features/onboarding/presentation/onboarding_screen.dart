@@ -28,6 +28,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 onPageChanged: (pg) => setState(() => _currentPage = pg),
                 children: [
                   _buildIntroPage(),
+                  _buildPrivacyPage(),
                   _buildCurrencyPage(),
                   _buildNotificationPage(),
                   _buildReadyPage(),
@@ -41,7 +42,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   // Page Indicators
                   Row(
-                    children: List.generate(4, (index) => _buildDot(index)),
+                    children: List.generate(5, (index) => _buildDot(index)),
                   ),
 
                   // Action Button
@@ -51,7 +52,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 14),
                     ),
-                    child: Text(_currentPage == 3 ? 'Get Started' : 'Next'),
+                    child: Text(_currentPage == 4 ? 'Get Started' : 'Next'),
                   ),
                 ],
               ),
@@ -77,7 +78,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _onNext() async {
-    if (_currentPage < 3) {
+    if (_currentPage < 4) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -116,6 +117,89 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPrivacyPage() {
+    return Padding(
+      padding: const EdgeInsets.all(32.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.shield_outlined,
+              size: 80, color: Theme.of(context).primaryColor),
+          const SizedBox(height: 32),
+          Text(
+            'Your Data, Your Privacy',
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'SubSentry is built on a simple principle: your financial data belongs to you.',
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          _buildPrivacyRow(
+            Icons.lock_outline,
+            'Stored securely on your device',
+            'All data is encrypted locally — it never leaves your phone.',
+          ),
+          const SizedBox(height: 16),
+          _buildPrivacyRow(
+            Icons.cloud_off_outlined,
+            'No account required',
+            'No sign-in, no cloud sync, no third-party servers.',
+          ),
+          const SizedBox(height: 16),
+          _buildPrivacyRow(
+            Icons.download_outlined,
+            'Export anytime',
+            'Download all your data as a CSV file whenever you like.',
+          ),
+          const SizedBox(height: 16),
+          _buildPrivacyRow(
+            Icons.delete_outline,
+            'Delete everything',
+            'Wipe all your data instantly from Settings at any time.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrivacyRow(IconData icon, String title, String subtitle) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 24, color: Theme.of(context).primaryColor),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 2),
+              Text(subtitle,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: Colors.grey)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

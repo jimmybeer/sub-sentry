@@ -1,6 +1,6 @@
 name: sub_sentry
 description: SubSentry - Financial Clarity for Subscriptions.
-version: 1.0.0+2
+version: 1.0.0+3
 environment:
   sdk: '>=3.2.0 <4.0.0'
 
@@ -39,6 +39,7 @@ dependencies:
   file_picker: ^10.3.10
   path_provider: ^2.1.5
   share_plus: ^12.0.1
+  in_app_review: 2.0.9
 
 dev_dependencies:
   sentry_dart_plugin: ^3.2.1

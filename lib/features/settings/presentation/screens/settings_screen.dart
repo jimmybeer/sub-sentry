@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sub_sentry/core/constants/currency_data.dart';
 import 'package:sub_sentry/shared/error_handling/error_handler.dart';
+import 'package:sub_sentry/shared/widgets/currency_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,20 +80,25 @@ class SettingsScreen extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.currency_exchange),
               title: const Text('Currency'),
-              trailing: DropdownButton<String>(
-                value: settings.currencyCode,
-                underline: const SizedBox(),
-                items: ['GBP', 'USD', 'EUR']
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                    .toList(),
-                onChanged: (val) {
-                  if (val != null) {
-                    ref
-                        .read(settingsControllerProvider.notifier)
-                        .setCurrency(val);
-                  }
-                },
-              ),
+              subtitle: Text(() {
+                final entry = kCurrencies.firstWhere(
+                  (e) => e.code == settings.currencyCode,
+                  orElse: () => CurrencyEntry(
+                      code: settings.currencyCode,
+                      symbol: '',
+                      countries: const []),
+                );
+                return entry.displayLabel;
+              }()),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                final picked = await showCurrencyPicker(context);
+                if (picked != null) {
+                  ref
+                      .read(settingsControllerProvider.notifier)
+                      .setCurrency(picked.code);
+                }
+              },
             ),
             const Divider(),
 

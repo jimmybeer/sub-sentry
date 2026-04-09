@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sub_sentry/core/constants/currency_data.dart';
+import 'package:sub_sentry/shared/widgets/currency_picker.dart';
 
 import '../../settings/presentation/providers/settings_controller.dart';
 import '../../notifications/providers/notification_provider.dart';
@@ -71,7 +73,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       height: 8,
       width: isActive ? 24 : 8,
       decoration: BoxDecoration(
-        color: isActive ? Theme.of(context).primaryColor : Colors.grey.shade300,
+        color: isActive ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -96,7 +98,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.rocket_launch,
-              size: 80, color: Theme.of(context).primaryColor),
+              size: 80, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 32),
           Text(
             'Welcome to SubSentry',
@@ -127,7 +129,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.shield_outlined,
-              size: 80, color: Theme.of(context).primaryColor),
+              size: 80, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 32),
           Text(
             'Your Data, Your Privacy',
@@ -179,7 +181,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 24, color: Theme.of(context).primaryColor),
+        Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
@@ -213,7 +215,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.currency_exchange,
-              size: 80, color: Theme.of(context).primaryColor),
+              size: 80, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 32),
           Text(
             'Select Currency',
@@ -223,22 +225,49 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 32),
-          Wrap(
-            spacing: 16,
-            children: ['GBP', 'USD', 'EUR'].map((code) {
-              final isSelected = code == currentCurrency;
-              return ChoiceChip(
-                label: Text(code),
-                selected: isSelected,
-                onSelected: (selected) {
-                  if (selected) {
-                    ref
-                        .read(settingsControllerProvider.notifier)
-                        .setCurrency(code);
-                  }
-                },
-              );
-            }).toList(),
+          GestureDetector(
+            onTap: () async {
+              final picked = await showCurrencyPicker(context);
+              if (picked != null) {
+                ref
+                    .read(settingsControllerProvider.notifier)
+                    .setCurrency(picked.code);
+              }
+            },
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    () {
+                      final entry = kCurrencies.firstWhere(
+                        (e) => e.code == currentCurrency,
+                        orElse: () => CurrencyEntry(
+                            code: currentCurrency,
+                            symbol: '',
+                            countries: const []),
+                      );
+                      return entry.displayLabel;
+                    }(),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.expand_more,
+                      color: Theme.of(context).colorScheme.primary),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -252,7 +281,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.notifications_active,
-              size: 80, color: Theme.of(context).primaryColor),
+              size: 80, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 32),
           Text(
             'Stay Updated',

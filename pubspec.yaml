@@ -1,6 +1,6 @@
 name: sub_sentry
 description: SubSentry - Financial Clarity for Subscriptions.
-version: 1.0.0+3
+version: 1.1.0+4
 environment:
   sdk: '>=3.2.0 <4.0.0'
 
